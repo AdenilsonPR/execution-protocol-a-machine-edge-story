@@ -1,0 +1,85 @@
+[gd_scene format=3 uid="uid://coc1tktfvb0b7"]
+
+[ext_resource type="Script" uid="uid://ccmdsk3gegctp" path="res://addons/omni_term/src/terminal/components/input_container/input_container.gd" id="1_t6cn6"]
+[ext_resource type="FontFile" uid="uid://dunfgwn5gtguc" path="res://addons/omni_term/assets/fonts/VT323-Regular.ttf" id="2_o4g2v"]
+[ext_resource type="ColorPalette" uid="uid://bgbv13biatbmr" path="res://addons/omni_term/assets/color_palettes/base_palette.tres" id="2_tjmjl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s1m3i"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_276aj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tjmjl"]
+
+[node name="InputContainer" type="VBoxContainer" unique_id=1659656604]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 50.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("1_t6cn6")
+base_patelle = ExtResource("2_tjmjl")
+
+[node name="Label" type="RichTextLabel" parent="." unique_id=398764138]
+layout_mode = 2
+theme_override_colors/default_color = Color(0.50980395, 0.46666667, 0.39215687, 1)
+theme_override_fonts/normal_font = ExtResource("2_o4g2v")
+theme_override_fonts/bold_font = ExtResource("2_o4g2v")
+theme_override_fonts/bold_italics_font = ExtResource("2_o4g2v")
+theme_override_fonts/italics_font = ExtResource("2_o4g2v")
+theme_override_fonts/mono_font = ExtResource("2_o4g2v")
+theme_override_font_sizes/normal_font_size = 24
+theme_override_font_sizes/bold_font_size = 24
+theme_override_font_sizes/bold_italics_font_size = 24
+theme_override_font_sizes/italics_font_size = 24
+theme_override_font_sizes/mono_font_size = 24
+bbcode_enabled = true
+text = "user@local:"
+fit_content = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2009451524]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1147498817]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.50980395, 0.46666667, 0.39215687, 1)
+theme_override_fonts/font = ExtResource("2_o4g2v")
+theme_override_font_sizes/font_size = 24
+text = "󰘍"
+
+[node name="Control" type="Control" parent="HBoxContainer" unique_id=111111]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SuggestionLabel" type="Label" parent="HBoxContainer/Control" unique_id=222222]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.2)
+theme_override_fonts/font = ExtResource("2_o4g2v")
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer/Control" unique_id=240084607]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
+theme_override_colors/font_uneditable_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
+theme_override_colors/caret_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
+theme_override_constants/caret_width = 8
+theme_override_fonts/font = ExtResource("2_o4g2v")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxEmpty_s1m3i")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_276aj")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_tjmjl")
+selecting_enabled = false
+flat = true
+caret_blink = true
+caret_blink_interval = 0.5

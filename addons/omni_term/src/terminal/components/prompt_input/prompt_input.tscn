@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://cmkowojbwi2qf"]
+
+[ext_resource type="Script" uid="uid://nmhxwcppjhhj" path="res://addons/omni_term/src/terminal/components/prompt_input/prompt_input.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://dunfgwn5gtguc" path="res://addons/omni_term/assets/fonts/VT323-Regular.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wuwii"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5atjq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bi272"]
+
+[node name="PromptInput" type="HBoxContainer" unique_id=1265934261]
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+script = ExtResource("1_script")
+
+[node name="Label" type="Label" parent="." unique_id=2105204109]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.627451, 0.57254905, 0.47058824, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "prompt:"
+
+[node name="LineEdit" type="LineEdit" parent="." unique_id=469354851]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
+theme_override_colors/font_uneditable_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
+theme_override_colors/caret_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
+theme_override_constants/caret_width = 8
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxEmpty_wuwii")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_5atjq")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_bi272")
+selecting_enabled = false
+flat = true
+caret_blink = true
+caret_blink_interval = 0.5
