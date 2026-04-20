@@ -1,0 +1,225 @@
+{
+  "main": {
+    "id": "299b5e887dcbc2f6",
+    "type": "split",
+    "children": [
+      {
+        "id": "788c3b1154c01521",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "22c92f1ffa2aca43",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/demo/tasks/task_002_autoloads.md",
+                "mode": "preview",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "task_002_autoloads"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "4097424f3e10d517",
+    "type": "split",
+    "children": [
+      {
+        "id": "a418f84c6c8adefe",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ee3c6a493af02b5b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de arquivos"
+            }
+          },
+          {
+            "id": "88dedf44720cbc36",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Procurar"
+            }
+          },
+          {
+            "id": "28cdc4d7719c5d6f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "00d6c2301760c3c6",
+    "type": "split",
+    "children": [
+      {
+        "id": "f34d77b18767dc80",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f3dfcacb6a066a7e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/demo/03_combate.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Links inversos para 03_combate"
+            }
+          },
+          {
+            "id": "24545765a4add8e2",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/demo/03_combate.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Links de saída para 03_combate"
+            }
+          },
+          {
+            "id": "0513503dff1a7367",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "d301d0f72cc90215",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas as propriedades"
+            }
+          },
+          {
+            "id": "32819ae5935958a4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/demo/03_combate.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Sumário de 03_combate"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir a troca rápida": false,
+      "graph:Abrir visualização em gráfico": false,
+      "canvas:Criar novo canvas": false,
+      "daily-notes:Abrir a nota de hoje": false,
+      "templates:Inserir modelo": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Criar nova base": false
+    }
+  },
+  "active": "22c92f1ffa2aca43",
+  "lastOpenFiles": [
+    "docs/demo/docs/shop/04_oficina_status.md",
+    "docs/demo/docs/shop/04_loja_inventario.md",
+    "docs/demo/docs/terminal/02_mapa_combate.md",
+    "docs/demo/docs/combate/03_combate_status.md",
+    "docs/demo/docs/terminal/02_mapa.md",
+    "docs/demo/docs/shop/04_oficina.md",
+    "docs/demo/tasks/task_001_estrutura_base.md",
+    "docs/demo/tasks/index.md",
+    "task_001_estrutura_base&.md",
+    "docs/demo/dialogues/01_00_boot.md",
+    "docs/demo/tasks/task_010_testes.md",
+    "docs/demo/tasks/task_009_narrativa.md",
+    "docs/demo/tasks/task_008_inventario.md",
+    "docs/demo/tasks/task_007_missoes.md",
+    "docs/demo/tasks/task_006_combate.md",
+    "docs/demo/tasks/task_005_chat_painel.md",
+    "docs/demo/tasks/task_004_terminal_layout.md",
+    "docs/demo/tasks/task_003_terminal_comandos.md",
+    "docs/demo/tasks/task_002_autoloads.md",
+    "docs/demo/docs/narrativa/Ideia de narrativa para demo.md",
+    "docs/demo/docs/implementacao/plano_de_implementacao.md",
+    "docs/demo/docs/chat/09_chat_comportamento.md",
+    "docs/demo/docs/implementacao/08_implementacao.md",
+    "docs/demo/docs/save/07_save.md",
+    "docs/demo/docs/narrativa/06_decryption.md",
+    "docs/demo/docs/chat/05_chat.md",
+    "docs/demo/tasks",
+    "docs/demo/docs/terminal",
+    "docs/demo/docs/shop",
+    "docs/demo/docs/save",
+    "docs/demo/docs/narrativa",
+    "docs/demo/docs/implementacao",
+    "docs/demo/docs/combate",
+    "docs/demo/docs/chat",
+    "docs/demo/docs",
+    "docs/demo"
+  ]
+}

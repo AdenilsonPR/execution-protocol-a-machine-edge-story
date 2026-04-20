@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://ccmdsk3gegctp" path="res://addons/omni_term/src/terminal/components/input_container/input_container.gd" id="1_t6cn6"]
 [ext_resource type="FontFile" uid="uid://dunfgwn5gtguc" path="res://addons/omni_term/assets/fonts/VT323-Regular.ttf" id="2_o4g2v"]
-[ext_resource type="ColorPalette" uid="uid://bgbv13biatbmr" path="res://addons/omni_term/assets/color_palettes/base_palette.tres" id="2_tjmjl"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s1m3i"]
 
@@ -17,7 +16,6 @@ offset_bottom = 50.0
 grow_horizontal = 2
 size_flags_horizontal = 3
 script = ExtResource("1_t6cn6")
-base_patelle = ExtResource("2_tjmjl")
 
 [node name="Label" type="RichTextLabel" parent="." unique_id=398764138]
 layout_mode = 2
@@ -44,7 +42,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.50980395, 0.46666667, 0.39215687, 1)
 theme_override_fonts/font = ExtResource("2_o4g2v")
 theme_override_font_sizes/font_size = 24
-text = "󰘍"
+text = ">"
 
 [node name="Control" type="Control" parent="HBoxContainer" unique_id=111111]
 layout_mode = 2

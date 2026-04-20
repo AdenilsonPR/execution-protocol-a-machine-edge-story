@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://fmvbthdfakwo"]
+
+[ext_resource type="Script" uid="uid://dkxxxnrfato7a" path="res://addons/omni_chat/src/chat/chat.gd" id="1_y3ec6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y3ec6"]
+
+[node name="Chat" type="PanelContainer" unique_id=1617347615]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_y3ec6")
+script = ExtResource("1_y3ec6")

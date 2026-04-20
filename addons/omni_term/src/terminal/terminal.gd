@@ -1,594 +1,534 @@
 @tool
-class_name Terminal extends PanelContainer
+@icon("res://addons/omni_term/assets/terminal_icon.png")
+class_name OmniTerm extends Control
 
 
 signal action_triggered(action_id: String)
+signal output_rendered(text: String)
 
 
 enum InputMode {
 	IDLE,
 	COMMAND,
-	CHOICE,
 	PROMPT
 }
 
 
 const _INPUT_COMMAND: PackedScene = preload("res://addons/omni_term/src/terminal/components/input_container/input_container.tscn")
-const _INPUT_CHOICE: PackedScene = preload("res://addons/omni_term/src/terminal/components/choice_input/choice_input.tscn")
-const _INPUT_PROMPT: PackedScene = preload("res://addons/omni_term/src/terminal/components/prompt_input/prompt_input.tscn")
+const TYPING_SPEED_MS: float = 0.01
 
-static var DEFAULT_EFFECTS_PATH: String:
-	get: return ProjectSettings.get_setting("omni_term/paths/effects", "res://addons/omni_term/src/scripts/effects/")
-
-static var DEFAULT_INLINE_PATH: String:
-	get: return ProjectSettings.get_setting("omni_term/paths/inline_elements", "res://addons/omni_term/src/terminal/components/inline/")
-
-static var DEFAULT_INPUTS_PATH: String:
-	get: return ProjectSettings.get_setting("omni_term/paths/custom_inputs", "res://addons/omni_term/src/terminal/components/inputs/")
-
-static var DEFAULT_COMMANDS_PATH: String:
-	get: return ProjectSettings.get_setting("omni_term/paths/commands", "res://addons/omni_term/src/terminal/commands/builtin/")
-
-@export_group("Login Settings")
-@export var username: String = "user"
-@export var hostname: String = "local"
-
-@export_group("Narrative Flow")
-@export var intro_sequence: StorySequence
-@export_file("*.omni") var dialogue_file: String = ""
-
-@export_group("Audio Settings")
-@export var sound_bank: TerminalSoundBank
-@export var default_sound_id: String = "default"
-
-var _container: VBoxContainer
-var _scroll: ScrollContainer
 
 var command_processor: CommandProcessor
 var _current_input: Control
 var _mode: InputMode = InputMode.IDLE
 var _command_history: Array[String] = []
 var _history_index: int = -1
-var _last_sound_played_char: int = -1
+var _internal_log: VBoxContainer
+var _scroll_node: ScrollContainer
+var _username: String = "user"
+var _hostname: String = "local"
+var _custom_effects: Array = []
 var _audio_player: AudioStreamPlayer
+var _audio_cache: Dictionary = {}
+var _is_locked: bool = false
+var _output_queue: Array[CommandOutput] = []
+var _is_rendering: bool = false
 
 
 func _ready() -> void:
 	_setup_ui()
+	_setup_audio()
+	_load_custom_effects()
+
+	if _custom_effects.is_empty():
+		var fallback_script: GDScript = load("res://omni_term_custom/effects/speed.gd")
+		if fallback_script:
+			_custom_effects.append(fallback_script.new())
+
 	if Engine.is_editor_hint():
 		return
 
 	add_to_group("terminal")
-	_audio_player = AudioStreamPlayer.new()
-	add_child(_audio_player)
 
-	command_processor = CommandProcessor.new(DEFAULT_COMMANDS_PATH)
+	command_processor = CommandProcessor.new()
 
-	_load_automatic_effects()
-	_load_automatic_inline_elements()
-	_load_automatic_custom_inputs()
 	_start_engine()
 
 
-func _setup_ui() -> void:
-	_container = get_node_or_null("MarginContainer/PanelContainer/ScrollContainer/VBoxContainer")
-	_scroll = get_node_or_null("MarginContainer/PanelContainer/ScrollContainer")
+func _load_custom_effects() -> void:
+	_custom_effects.clear()
+	var path: String = ProjectSettings.get_setting("omni_term/paths/effects", "res://omni_term_custom/effects/")
 
-	if _container and _scroll:
+	if not path.ends_with("/"):
+		path += "/"
+
+	if not DirAccess.dir_exists_absolute(path):
 		return
 
-	var margin: MarginContainer = MarginContainer.new()
-	margin.name = "MarginContainer"
-	margin.add_theme_constant_override("margin_left", 16)
-	margin.add_theme_constant_override("margin_top", 16)
-	margin.add_theme_constant_override("margin_right", 16)
-	margin.add_theme_constant_override("margin_bottom", 16)
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(margin)
+	var dir: DirAccess = DirAccess.open(path)
+	if not dir:
+		return
 
-	var panel: PanelContainer = PanelContainer.new()
-	panel.name = "PanelContainer"
-	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-	margin.add_child(panel)
+	dir.list_dir_begin()
+	var file_name: String = dir.get_next()
 
-	_scroll = ScrollContainer.new()
-	_scroll.name = "ScrollContainer"
-	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_child(_scroll)
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.ends_with(".gd"):
+			var effect_script: GDScript = load(path + file_name)
+			if effect_script:
+				var effect_instance: Variant = effect_script.new()
+				if effect_instance and "bbcode" in effect_instance:
+					_custom_effects.append(effect_instance)
 
-	_container = VBoxContainer.new()
-	_container.name = "VBoxContainer"
-	_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_container.add_theme_constant_override("separation", 8)
-	_scroll.add_child(_container)
+		file_name = dir.get_next()
+
+
+func set_username(new_username: String) -> void:
+	_username = new_username
+
+
+func set_hostname(new_hostname: String) -> void:
+	_hostname = new_hostname
+
+
+func _setup_ui() -> void:
+	if get_child_count() > 0:
+		var margin_node: Node = get_node_or_null("MarginContainer")
+		
+		if margin_node:
+			var panel_node: Node = margin_node.get_node_or_null("PanelContainer")
+			if panel_node:
+				_scroll_node = panel_node.get_node_or_null("ScrollContainer") as ScrollContainer
+				if _scroll_node:
+					_internal_log = _scroll_node.get_node_or_null("VBoxContainer") as VBoxContainer
+					if _internal_log:
+						return
+
+	for child: Node in get_children():
+		child.queue_free()
+
+	_setup_theme()
+
+	var margin_node_new: MarginContainer = MarginContainer.new()
+	margin_node_new.name = "MarginContainer"
+	margin_node_new.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(margin_node_new)
+
+	var panel_node_new: PanelContainer = PanelContainer.new()
+	panel_node_new.name = "PanelContainer"
+	margin_node_new.add_child(panel_node_new)
+
+	_scroll_node = ScrollContainer.new()
+	_scroll_node.name = "ScrollContainer"
+	_scroll_node.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll_node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll_node.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	panel_node_new.add_child(_scroll_node)
+
+	_internal_log = VBoxContainer.new()
+	_internal_log.name = "VBoxContainer"
+	_internal_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_internal_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll_node.add_child(_internal_log)
+
+
+func _setup_theme() -> void:
+	if theme != null:
+		return
+
+	var custom_theme_path: String = ProjectSettings.get_setting("omni_system/theme/custom_theme", "")
+	if custom_theme_path != "" and ResourceLoader.exists(custom_theme_path):
+		var custom_theme: Theme = load(custom_theme_path) as Theme
+		if custom_theme:
+			self.theme = custom_theme
+			return
+
+	var default_theme: Theme = Theme.new()
+	var font: FontFile = load("res://addons/omni_term/assets/fonts/VT323-Regular.ttf")
+	var base_color: Color = Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 6))
+
+	default_theme.set_font("normal_font", "RichTextLabel", font)
+	default_theme.set_font_size("normal_font_size", "RichTextLabel", 24)
+	default_theme.set_color("default_color", "RichTextLabel", base_color)
+
+	var grabber_normal: StyleBoxFlat = StyleBoxFlat.new()
+	grabber_normal.bg_color = Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 2))
+	grabber_normal.corner_radius_top_left = 4
+	grabber_normal.corner_radius_top_right = 4
+	grabber_normal.corner_radius_bottom_left = 4
+	grabber_normal.corner_radius_bottom_right = 4
+
+	var grabber_active: StyleBoxFlat = StyleBoxFlat.new()
+	grabber_active.bg_color = Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 3))
+	grabber_active.corner_radius_top_left = 4
+	grabber_active.corner_radius_top_right = 4
+	grabber_active.corner_radius_bottom_left = 4
+	grabber_active.corner_radius_bottom_right = 4
+
+	var scroll_bg: StyleBoxFlat = StyleBoxFlat.new()
+	scroll_bg.bg_color = Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 0))
+	scroll_bg.content_margin_left = 4
+	scroll_bg.content_margin_right = 4
+
+	default_theme.set_stylebox("grabber", "VScrollBar", grabber_normal)
+	default_theme.set_stylebox("grabber_highlight", "VScrollBar", grabber_active)
+	default_theme.set_stylebox("grabber_pressed", "VScrollBar", grabber_active)
+	default_theme.set_stylebox("scroll", "VScrollBar", scroll_bg)
+
+	default_theme.set_constant("margin_left", "MarginContainer", 16)
+	default_theme.set_constant("margin_top", "MarginContainer", 16)
+	default_theme.set_constant("margin_right", "MarginContainer", 16)
+	default_theme.set_constant("margin_bottom", "MarginContainer", 16)
+
+	var empty_style: StyleBoxEmpty = StyleBoxEmpty.new()
+	default_theme.set_stylebox("panel", "PanelContainer", empty_style)
+	default_theme.set_constant("separation", "VBoxContainer", 8)
+
+	self.theme = default_theme
+
+
+func _setup_audio() -> void:
+	if _audio_player:
+		return
+
+	_audio_player = AudioStreamPlayer.new()
+	_audio_player.bus = "SFX"
+	add_child(_audio_player)
+
+	_load_sound("typewriter")
+
+
+func _load_sound(sound_name: String) -> AudioStream:
+	if _audio_cache.has(sound_name):
+		return _audio_cache[sound_name]
+
+	var path: String = "res://omni_term_custom/sounds/" + sound_name + ".wav"
+	if FileAccess.file_exists(path):
+		var stream: AudioStream = load(path)
+		_audio_cache[sound_name] = stream
+		return stream
+	
+	return null
+
+
+func lock() -> void:
+	_is_locked = true
+
+	if _current_input:
+		_freeze_node(_current_input)
+
+
+func unlock() -> void:
+	_is_locked = false
+
+	if _mode == InputMode.COMMAND and not _current_input:
+		create_new_line()
+	elif _current_input:
+		activate()
 
 
 func create_new_line() -> void:
+	if _is_locked or (_current_input and is_instance_valid(_current_input)):
+		return
+
 	_freeze_history()
 	_mode = InputMode.COMMAND
-	var input: InputContainer = _INPUT_COMMAND.instantiate()
-	_container.add_child(input)
-	input.setup(username, hostname)
-	input.changed.connect(_on_input_changed)
-	input.submitted.connect(_on_input_submitted)
-	if input.has_signal("history_up"): input.history_up.connect(_on_history_up)
-	if input.has_signal("history_down"): input.history_down.connect(_on_history_down)
-	if input.has_signal("autocomplete_requested"): input.autocomplete_requested.connect(_on_autocomplete_requested)
-	_current_input = input
+
+	var input_node: InputContainer = _INPUT_COMMAND.instantiate()
+
+	_current_input = input_node
+	_add_to_log(input_node)
+
+	input_node.setup(_username, _hostname)
+	input_node.changed.connect(_on_input_changed)
+	input_node.submitted.connect(_on_input_submitted)
+
+	if input_node.has_signal("history_up"):
+		input_node.history_up.connect(_on_history_up)
+
+	if input_node.has_signal("history_down"):
+		input_node.history_down.connect(_on_history_down)
+
+	if input_node.has_signal("autocomplete_requested"):
+		input_node.autocomplete_requested.connect(_on_autocomplete_requested)
+
 	_scroll_to_bottom()
 
 
 func _freeze_history() -> void:
-	for child in _container.get_children():
-		_freeze_node(child)
+	_current_input = null
+
+	for child_node: Node in _internal_log.get_children():
+		_freeze_node(child_node)
 
 
 func _freeze_node(node: Node) -> void:
 	if node.has_method("disable"):
 		node.disable()
+
 	if node is Control:
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for child in node.get_children():
-		_freeze_node(child)
+		node.focus_mode = Control.FOCUS_NONE
+
+	for child_node: Node in node.get_children():
+		_freeze_node(child_node)
 
 
-func prompt_choice(options: Array[String], option_keys: Array[String] = []) -> int:
-	_mode = InputMode.CHOICE
-	var input: ChoiceInput = _INPUT_CHOICE.instantiate()
-	_container.add_child(input)
-	input.setup(options, option_keys)
-	_current_input = input
+func write_line(text: String) -> void:
+	await render_output(CommandOutput.create(text))
+
+
+func inject_custom_input(input_node: Control) -> void:
+	_freeze_history()
+	_internal_log.add_child(input_node)
+	_current_input = input_node
+
+	await get_tree().process_frame
+	await get_tree().process_frame
+
 	_scroll_to_bottom()
-	var result = await input.submitted
-	input.disable()
-	return result
+	input_node.grab_focus()
 
 
-func prompt_text(label: String, is_password: bool = false) -> String:
-	_mode = InputMode.PROMPT
-	var input: PromptInput = _INPUT_PROMPT.instantiate()
-	_container.add_child(input)
-	input.setup(label, is_password)
-	_current_input = input
-	_scroll_to_bottom()
-	var result = await input.submitted
-	input.disable()
-	return result
+func render_output(output_data: CommandOutput) -> void:
+	_output_queue.append(output_data)
 
+	if _is_rendering:
+		while _is_rendering:
+			await get_tree().process_frame
 
-func prompt_custom(input_name: String, params: Dictionary = {}) -> Variant:
-	if not _auto_custom_inputs.has(input_name):
-		return null
-
-	_mode = InputMode.PROMPT
-	var input: Node = _auto_custom_inputs[input_name].instantiate()
-	_container.add_child(input)
-
-	if input.has_method("setup"):
-		input.call("setup", params)
-
-	_current_input = input as Control
-	_scroll_to_bottom()
-	var result: Variant = await input.get("submitted").connect(func(v): return v)
-
-	if input.has_method("disable"):
-		input.call("disable")
-
-	return result
-
-
-func render_output(output: CommandOutput) -> void:
-	if output.text.is_empty():
 		return
 
-	var speed: float = 30.0
-	var sound_id: String = default_sound_id
+	_is_rendering = true
 
-	for effect in output.effects:
-		if effect is SpeedEffect:
-			speed = effect.chars_per_second
+	while not _output_queue.is_empty():
+		var current_output: CommandOutput = _output_queue.pop_front()
+		await _process_output(current_output)
 
-	await _render_narrative_flow(tr(output.text), Color.WHITE, speed, sound_id)
+	_is_rendering = false
+
+
+func _process_output(output_data: CommandOutput) -> void:
+	if output_data.text.is_empty():
+		return
+
+	_freeze_history()
+
+	var label: RichTextLabel = RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.fit_content = true
+
+	for effect: Variant in _custom_effects:
+		label.custom_effects.append(effect)
+
+	_add_to_log(label)
+	label.text = _preprocess_text(output_data.text)
+
+	output_rendered.emit(output_data.text)
+	await _type_text(label, 0.0)
+	_scroll_to_bottom()
 
 
 func clear_terminal() -> void:
-	for child: Node in _container.get_children():
+	for child: Node in _internal_log.get_children():
 		child.queue_free()
 
+	_current_input = null
 
-func play_sequence(sequence: StorySequence) -> void:
-	if not sequence:
+
+func activate() -> void:
+	if _current_input and not _current_input.is_queued_for_deletion():
+		_current_input.grab_focus()
 		return
-
-	for event in sequence.events:
-		if not event:
-			continue
-
-		var sound_id: String = default_sound_id
-
-		if "sound_id" in event:
-			sound_id = event.get("sound_id")
-		if event is ChoiceEvent:
-			await _handle_choice_event(event as ChoiceEvent, sound_id)
-		elif event is TextEvent:
-			await _render_text_event(event, sound_id)
-		elif event is PromptEvent:
-			await _handle_prompt_event(event as PromptEvent, sound_id)
-		elif event is TextPromptEvent:
-			await _handle_text_prompt_event(event as TextPromptEvent, sound_id)
-		elif event is SignalEvent:
-			action_triggered.emit(event.action_id)
-		if event.delay > 0:
-			await get_tree().create_timer(event.delay).timeout
-
-
-func reboot() -> void:
-	clear_terminal()
-	_start_engine()
-
-
-func _start_engine() -> void:
-	_mode = InputMode.IDLE
-	await get_tree().process_frame
-
-	if not dialogue_file.is_empty():
-		var sequence: StorySequence = OmniDialogueParser.parse_file(dialogue_file)
-		if sequence:
-			await play_sequence(sequence)
-	elif intro_sequence:
-		await play_sequence(intro_sequence)
 
 	create_new_line()
 
 
-func _render_text_event(event: TextEvent, sound_id: String = "") -> void:
-	if sound_id == "":
-		sound_id = default_sound_id
-
-	var final_text: String = tr(event.localization_key) if not event.localization_key.is_empty() else tr(event.text)
-	await _render_narrative_flow(final_text, event.color, event.speed, sound_id)
+func _start_engine() -> void:
+	_mode = InputMode.IDLE
 
 
-var _auto_effects: Dictionary = {}
-var _auto_inline_elements: Dictionary = {}
-var _auto_custom_inputs: Dictionary = {}
+func _add_to_log(node: Node) -> void:
+	_internal_log.add_child(node)
+
+	if _current_input and _current_input.get_parent() == _internal_log:
+		if _current_input.focus_mode != Control.FOCUS_NONE:
+			_internal_log.move_child(node, _current_input.get_index())
 
 
-func _load_dir_into_dict(path: String, dict: Dictionary, suffix: String) -> void:
-	if path.is_empty():
-		return
-
-	if not path.ends_with("/"):
-		path += "/"
-
-	var dir: DirAccess = DirAccess.open(path)
-	if dir:
-		dir.list_dir_begin()
-		var file_name: String = dir.get_next()
-
-		while file_name != "":
-			if not dir.current_is_dir() and file_name.ends_with(suffix):
-				var tag_name: String = file_name.replace(suffix, "").to_lower()
-				var res: Resource = load(path + file_name)
-				if res != null:
-					dict[tag_name] = res
-			file_name = dir.get_next()
-
-
-func _load_automatic_custom_inputs() -> void:
-	_load_dir_into_dict(DEFAULT_INPUTS_PATH, _auto_custom_inputs, ".tscn")
-
-
-func _load_automatic_inline_elements() -> void:
-	_load_dir_into_dict(DEFAULT_INLINE_PATH, _auto_inline_elements, ".tscn")
-
-
-func _load_automatic_effects() -> void:
-	_load_dir_into_dict(DEFAULT_EFFECTS_PATH, _auto_effects, "_effect.gd")
-	if _auto_effects.has("delay"):
-		_auto_effects["wait"] = _auto_effects["delay"]
-
-
-func _render_text_segment(flow: Control, text: String, color: Color, speed: float, sound_id: String = "") -> void:
-	var label: RichTextLabel = _create_label(text)
-	label.visible_characters = 0
-	label.add_theme_color_override("default_color", color)
-	label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	flow.add_child(label)
-
-	await get_tree().process_frame
-	label.custom_minimum_size = label.get_combined_minimum_size()
-
-	var effect: SpeedEffect = SpeedEffect.create(speed)
-	effect.apply(label)
-
-	var stream: AudioStream = null
-	if sound_bank and not sound_id.is_empty():
-		stream = sound_bank.get_sound(sound_id)
-
-	_last_sound_played_char = -1
-
-	while label.visible_characters < label.get_total_character_count() and not effect.is_completed:
-		if label.visible_characters > _last_sound_played_char:
-			_last_sound_played_char = label.visible_characters
-			if stream and not _audio_player.playing:
-				_audio_player.stream = stream
-				_audio_player.pitch_scale = randf_range(sound_bank.default_pitch_range.x, sound_bank.default_pitch_range.y)
-				_audio_player.volume_db = sound_bank.default_volume_db
-				_audio_player.play()
-		await get_tree().process_frame
-
-	if not effect.is_completed:
-		await effect.completed
-
-
-func _create_label(text: String) -> RichTextLabel:
-	text = _preprocess_palette_tags(text)
-	var label: RichTextLabel = RichTextLabel.new()
-	label.bbcode_enabled = true
-	label.fit_content = true
-	label.text = text
-	label.selection_enabled = true
-	label.focus_mode = Control.FOCUS_NONE
-	var font: FontFile = preload("res://addons/omni_term/assets/fonts/VT323-Regular.ttf")
-	label.add_theme_font_override("normal_font", font)
-	label.add_theme_font_size_override("normal_font_size", 24)
-	var text_color: String = Colors.get_color(Colors.Name.NEUTRAL, 5)
-	label.add_theme_color_override("default_color", Color("#" + text_color))
-	label.meta_clicked.connect(_on_meta_clicked)
-	return label
-
-
-func _preprocess_palette_tags(text: String) -> String:
+func _preprocess_text(text: String) -> String:
 	var regex: RegEx = RegEx.new()
-	regex.compile("\\[p=(.*?)\\](.*?)\\[/p\\]")
+	regex.compile("\\[omni_color=([A-Za-z_]+)(?:\\.(\\d))?\\]")
 
-	var result: RegExMatch = regex.search(text)
-	while result:
-		var full_tag: String = result.get_string(0)
-		var params: PackedStringArray = result.get_string(1).split(":")
-		var inner_text: String = result.get_string(2)
-		var color_name_str: String = params[0].to_upper()
+	var result: String = text
 
-		var brightness: int = 3
-		if params.size() > 1:
-			brightness = params[1].to_int()
+	for m: RegExMatch in regex.search_all(text):
+		var color_name_str: String = m.get_string(1).to_upper()
+		var shade_str: String = m.get_string(2)
+		var shade: int = shade_str.to_int() if not shade_str.is_empty() else 3
 
-		var color_hex: String = "ffffff"
-		if Colors.Name.has(color_name_str):
-			var color_name_enum: int = Colors.Name.get(color_name_str)
-			color_hex = Colors.get_color(color_name_enum, brightness)
+		if color_name_str in ColorTerm.Name.keys():
+			var color_index: int = ColorTerm.Name.keys().find(color_name_str)
+			var hex: String = ColorTerm.get_color(color_index as ColorTerm.Name, shade)
+			result = result.replace(m.get_string(), "[color=#%s]" % hex)
 
-		var replacement: String = "[color=#%s]%s[/color]" % [color_hex, inner_text]
-		text = text.replace(full_tag, replacement)
-		result = regex.search(text)
+	result = result.replace("[/omni_color]", "[/color]")
 
-	return text
-
-
-func _on_meta_clicked(meta: Variant) -> void:
-	action_triggered.emit(str(meta))
-
-
-func _handle_choice_event(event: ChoiceEvent, sound_id: String = "") -> void:
-	if sound_id == "":
-		sound_id = default_sound_id
-
-	var final_prompt: String = tr(event.localization_key) if not event.localization_key.is_empty() else tr(event.text)
-	var text_color: Color = event.get("color") if "color" in event else Color.WHITE
-	await _render_narrative_flow(final_prompt, text_color, event.speed, sound_id)
-
-	var selected_index: int = await prompt_choice(event.options, event.option_keys)
-	if selected_index < event.branches.size():
-		var next_sequence: StorySequence = event.branches[selected_index]
-		if next_sequence:
-			await play_sequence(next_sequence)
-
-
-func _handle_prompt_event(event: PromptEvent, sound_id: String = "") -> void:
-	if sound_id == "":
-		sound_id = default_sound_id
-
-	if not event.text.is_empty():
-		var output: CommandOutput = CommandOutput.create(tr(event.text))
-		output.add_effect(SpeedEffect.create(event.speed))
-		await _render_narrative_flow(tr(event.text), Colors.get_color(Colors.Name.NEUTRAL, 6), event.speed, sound_id)
-
-	var result: Variant = await prompt_custom(event.input_name, event.params)
-	var found_match: bool = false
-
-	if result != null and typeof(result) == TYPE_STRING:
-		var result_str: String = result as String
-		for i: int in range(event.result_keys.size()):
-			if event.result_keys[i] == result_str:
-				found_match = true
-				if i < event.result_branches.size():
-					var next_sequence: StorySequence = event.result_branches[i]
-					if next_sequence:
-						await play_sequence(next_sequence)
-				break
-
-	if not found_match and event.default_branch:
-		await play_sequence(event.default_branch)
-
-
-func _handle_text_prompt_event(event: TextPromptEvent, sound_id: String = "") -> void:
-	if sound_id == "":
-		sound_id = default_sound_id
-
-	if not event.text.is_empty():
-		var output: CommandOutput = CommandOutput.create(tr(event.text))
-		output.add_effect(SpeedEffect.create(event.speed))
-		await _render_narrative_flow(tr(event.text), Colors.get_color(Colors.Name.NEUTRAL, 6), event.speed, sound_id)
-
-	var result: Variant = await prompt_text(event.label, event.is_password)
-	var found_match: bool = false
-
-	if result != null:
-		var result_str: String = result as String
-		for i: int in range(event.result_keys.size()):
-			if event.result_keys[i].strip_edges().to_lower() == result_str.strip_edges().to_lower():
-				found_match = true
-				if i < event.result_branches.size():
-					var next_sequence: StorySequence = event.result_branches[i]
-					if next_sequence:
-						await play_sequence(next_sequence)
-				break
-
-	if not found_match and event.default_branch:
-		await play_sequence(event.default_branch)
+	return result
 
 
 func _scroll_to_bottom() -> void:
-	await get_tree().create_timer(0.01).timeout
-	_scroll.scroll_vertical = int(_scroll.get_v_scroll_bar().max_value)
+	await get_tree().process_frame
+	_scroll_node.scroll_vertical = int(_scroll_node.get_v_scroll_bar().max_value)
+
+
+func _type_text(label: RichTextLabel, delay: float) -> void:
+	var base_delay: float = delay if delay > 0 else TYPING_SPEED_MS
+	var current_delay: float = base_delay
+	var speed_map: Dictionary = {}
+
+	var regex: RegEx = RegEx.new()
+	regex.compile("\\[typewriter s=([\\d.]+)(?: v=\"([^\"]+)\")?\\]")
+
+	var strip_regex: RegEx = RegEx.new()
+	strip_regex.compile("\\[.*?\\]")
+
+	var raw_text: String = label.text
+	for m: RegExMatch in regex.search_all(raw_text):
+		var s_val: float = m.get_string(1).to_float()
+		var sound_name: String = m.get_string(2)
+
+		var prefix: String = raw_text.left(m.get_start())
+		var clean_prefix: String = strip_regex.sub(prefix, "", true)
+		var parsed_index: int = clean_prefix.length()
+
+		speed_map[parsed_index] = {
+			"delay": 1.0 / s_val if s_val > 0 else base_delay,
+			"sound": sound_name if not sound_name.is_empty() else "typewriter"
+		}
+
+	label.visible_ratio = 0.0
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	var total_chars: int = label.get_total_character_count()
+
+	for i: int in range(total_chars + 1):
+		label.visible_characters = i
+
+		if speed_map.has(i):
+			current_delay = speed_map[i].delay
+			_audio_player.stream = _load_sound(speed_map[i].sound)
+
+		if current_delay > 0:
+			if _audio_player.stream and i > 0:
+				_audio_player.pitch_scale = randf_range(0.8, 1.2)
+				_audio_player.play()
+
+			await get_tree().create_timer(current_delay).timeout
+		
+		_scroll_to_bottom()
 
 
 func _on_input_changed(new_text: String) -> void:
-	if _mode != InputMode.COMMAND:
+	if _mode != InputMode.COMMAND or not _current_input:
 		return
 
-	var trimmed: String = new_text.strip_edges()
-	if trimmed.is_empty():
-		_current_input.call("set_input_color", Color("#" + Colors.get_color(Colors.Name.NEUTRAL)))
+	var trimmed_text: String = new_text.strip_edges()
+
+	if trimmed_text.is_empty():
+		_current_input.set_input_color(Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 6)))
 		return
 
-	var cmd_name: String = trimmed.split(" ", false)[0]
+	var cmd_name: String = trimmed_text.split(" ", false)[0]
+
 	if command_processor.has_command(cmd_name):
-		_current_input.call("set_input_color", Color("#" + Colors.get_color(Colors.Name.NEUTRAL, 6)))
+		_current_input.set_input_color(Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 6)))
 	else:
-		_current_input.call("set_input_color", Color("#" + Colors.get_color(Colors.Name.RED)))
+		_current_input.set_input_color(Color(ColorTerm.get_color(ColorTerm.Name.RED)))
 
 
-func _on_input_submitted(text: String) -> void:
-	if text.is_empty():
+func _on_input_submitted(input_text: String) -> void:
+	if input_text.is_empty():
 		create_new_line()
 		return
 
-	_command_history.append(text)
+	_command_history.append(input_text)
 	_history_index = -1
 
 	if _current_input.has_method("disable"):
-		_current_input.call("disable")
+		_current_input.disable()
 
-	var context: CommandContext = CommandContext.new(self)
-	var output: CommandOutput = command_processor.process(text, context)
-	await render_output(output)
+	var cmd_context: CommandContext = CommandContext.new(self)
+	var cmd_output: CommandOutput = command_processor.process(input_text, cmd_context)
+
+	await render_output(cmd_output)
 
 	if _mode == InputMode.COMMAND:
 		create_new_line()
 
 
 func _on_history_up() -> void:
-	if _command_history.is_empty(): return
+	if _command_history.is_empty():
+		return
+
 	if _history_index == -1:
 		_history_index = _command_history.size() - 1
 	elif _history_index > 0:
 		_history_index -= 1
+
 	if _current_input.has_method("set_input_text"):
 		_current_input.set_input_text(_command_history[_history_index])
 
 
 func _on_history_down() -> void:
-	if _history_index == -1: return
+	if _history_index == -1:
+		return
+
 	if _history_index < _command_history.size() - 1:
 		_history_index += 1
+
 		if _current_input.has_method("set_input_text"):
 			_current_input.set_input_text(_command_history[_history_index])
 	else:
 		_history_index = -1
+
 		if _current_input.has_method("set_input_text"):
 			_current_input.set_input_text("")
 
 
-func _on_autocomplete_requested(prefix: String) -> void:
-	var suggestion: String = _get_best_suggestion(prefix)
-	if suggestion != "" and _current_input.has_method("set_suggestion"):
-		_current_input.call("set_suggestion", suggestion)
+func _on_autocomplete_requested(prefix_text: String) -> void:
+	var suggestions: Array[String] = _get_all_suggestions(prefix_text)
+
+	if _current_input.has_method("set_suggestions"):
+		_current_input.set_suggestions(suggestions)
 
 
-func _get_best_suggestion(prefix: String) -> String:
-	if prefix.is_empty():
-		return ""
+func _get_all_suggestions(prefix_text: String) -> Array[String]:
+	var results: Array[String] = []
+	var parts: PackedStringArray = prefix_text.split(" ", false)
 
-	var commands: Array = command_processor.get_commands().keys()
-	for cmd: String in commands:
-		if cmd.begins_with(prefix.to_lower()):
-			return cmd
+	if parts.is_empty() or (parts.size() == 1 and not prefix_text.ends_with(" ")):
+		var command_keys: Array = command_processor.get_commands().keys()
+		var search_prefix: String = parts[0].to_lower() if not parts.is_empty() else ""
 
-	return ""
+		for cmd_key: String in command_keys:
+			if cmd_key.begins_with(search_prefix):
+				results.append(cmd_key)
+	else:
+		var cmd_name: String = parts[0].to_lower()
 
-func _render_narrative_flow(text: String, color: Color, speed: float, sound_id: String = "") -> void:
-	var regex: RegEx = RegEx.new()
-	regex.compile("(\\{(.*?)\\})|(\\[\\[\\s*(.*?)\\s*=\\s*(.*?)\\s*\\]\\])")
+		if command_processor.has_command(cmd_name):
+			var command: CommandBase = command_processor.get_commands()[cmd_name]
+			var args: PackedStringArray = PackedStringArray(parts.slice(1))
+			var context: CommandContext = CommandContext.new(self)
+			var cmd_suggestions: PackedStringArray = command.get_suggestions(args, context)
 
-	var lines: PackedStringArray = text.split("\n")
-	for i: int in range(lines.size()):
-		var line_text: String = lines[i]
-		if line_text.is_empty() and i < lines.size() - 1:
-			var spacer: Control = Control.new()
-			spacer.custom_minimum_size.y = 24
-			_container.add_child(spacer)
-			continue
+			var last_part: String = "" if prefix_text.ends_with(" ") else parts[-1].to_lower()
+			var base: String = prefix_text.left(prefix_text.rfind(" ") + 1)
 
-		var flow: HFlowContainer = HFlowContainer.new()
-		flow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		flow.alignment = FlowContainer.ALIGNMENT_BEGIN
-		_container.add_child(flow)
-		_scroll_to_bottom()
+			for suggestion: String in cmd_suggestions:
+				if suggestion.to_lower().begins_with(last_part):
+					results.append(base + suggestion)
 
-		var current_speed: float = speed
-		var current_sound_id: String = sound_id
-		var last_pos: int = 0
-
-		for result: RegExMatch in regex.search_all(line_text):
-			var prefix: String = line_text.substr(last_pos, result.get_start() - last_pos)
-			if not prefix.is_empty():
-				await _render_text_segment(flow, prefix, color, current_speed, current_sound_id)
-
-			if not result.get_string(1).is_empty():
-				var key: String = result.get_string(2).strip_edges()
-				if _auto_inline_elements.has(key):
-					var node: Node = _auto_inline_elements[key].instantiate()
-					if node is Control:
-						node.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-					flow.add_child(node)
-					_scroll_to_bottom()
-					await get_tree().process_frame
-
-			elif not result.get_string(3).is_empty():
-				var action: String = result.get_string(4).to_lower().strip_edges()
-				var raw_value: String = result.get_string(5).strip_edges()
-
-				if action == "speed":
-					current_speed = raw_value.to_float()
-				elif action == "sound" or action == "audio":
-					current_sound_id = raw_value
-				elif action == "prompt":
-					await prompt_custom(raw_value)
-				elif _auto_effects.has(action):
-					var effect: TextEffect = _auto_effects[action].new()
-					effect.set_value(raw_value.to_float())
-
-					var dummy: Control = Control.new()
-					dummy.visible = false
-					flow.add_child(dummy)
-
-					if effect is WaitEffect:
-						await get_tree().create_timer(raw_value.to_float()).timeout
-					else:
-						effect.apply(dummy)
-						await effect.completed
-					dummy.queue_free()
-
-			last_pos = result.get_end()
-
-		var suffix: String = line_text.substr(last_pos)
-		if not suffix.is_empty():
-			await _render_text_segment(flow, suffix, color, current_speed, current_sound_id)
-
-		if i < lines.size() - 1:
-			await get_tree().process_frame
+	return results

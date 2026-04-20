@@ -1,16 +1,14 @@
 class_name CommandProcessor extends RefCounted
 
 
-static var DEFAULT_COMMANDS_PATH: String:
-	get: return ProjectSettings.get_setting("omni_term/paths/commands", "res://addons/omni_term/src/terminal/commands/builtin/")
-
 var _commands: Dictionary = {}
 var _commands_path: String = ""
 
 
-func _init(path: String = "") -> void:
-	if not path.is_empty():
-		_commands_path = path if path.ends_with("/") else path + "/"
+func _init() -> void:
+	_commands_path = ProjectSettings.get_setting("omni_term/paths/commands", "res://omni_term_custom/commands/")
+	if not _commands_path.ends_with("/"):
+		_commands_path += "/"
 
 	_load_commands_automatically()
 
@@ -30,9 +28,10 @@ func process(raw_input: String, context: CommandContext) -> CommandOutput:
 	var args: PackedStringArray = PackedStringArray(parts.slice(1))
 
 	if not _commands.has(cmd_name):
-		return CommandOutput.create(tr(OmniInternalKeys.CMD_ERR_NOT_FOUND) + ": " + cmd_name)
+		return CommandOutput.create("CMD_ERR_NOT_FOUND: " + cmd_name)
 
 	var command: CommandBase = _commands[cmd_name]
+
 	return command.execute(args, context)
 
 
@@ -49,6 +48,7 @@ func _load_dir(path: String) -> void:
 		return
 
 	var dir: DirAccess = DirAccess.open(path)
+
 	if dir:
 		dir.list_dir_begin()
 		var file_name: String = dir.get_next()
@@ -60,11 +60,9 @@ func _load_dir(path: String) -> void:
 					var cmd: Variant = script.new()
 					if cmd is CommandBase:
 						register_command(cmd as CommandBase)
+
 			file_name = dir.get_next()
 
 
 func _load_commands_automatically() -> void:
-	_load_dir(DEFAULT_COMMANDS_PATH)
-
-	if _commands_path != DEFAULT_COMMANDS_PATH:
-		_load_dir(_commands_path)
+	_load_dir(_commands_path)

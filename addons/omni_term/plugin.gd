@@ -2,25 +2,21 @@
 extends EditorPlugin
 
 
-var import_plugin: EditorImportPlugin
-
-
 const SETTINGS: Dictionary = {
-	"omni_term/paths/commands": "res://addons/omni_term/src/terminal/commands/builtin/",
-	"omni_term/paths/effects": "res://addons/omni_term/src/scripts/effects/",
-	"omni_term/paths/inline_elements": "res://addons/omni_term/src/terminal/components/inline/",
-	"omni_term/paths/custom_inputs": "res://addons/omni_term/src/terminal/components/inputs/"
+	"omni_term/paths/commands": "res://omni_term_custom/commands/",
+	"omni_term/paths/effects": "res://omni_term_custom/effects/",
+	"omni_term/paths/sounds": "res://omni_term_custom/sounds/",
+	"omni_term/paths/inline_elements": "res://omni_term_custom/inline/",
+	"omni_term/paths/custom_inputs": "res://omni_term_custom/inputs/",
+	"omni_system/theme/custom_theme": "",
+	"omni_system/theme/color_palette": "res://addons/omni_term/assets/color_palettes/base_palette.tres"
 }
 
 
 func _enter_tree() -> void:
-	if Engine.is_editor_hint():
-		import_plugin = preload("res://addons/omni_term/src/scripts/omni_dialogue_importer.gd").new()
-		add_import_plugin(import_plugin)
-
 	_register_settings()
 	add_custom_type(
-		"Terminal",
+		"OmniTerm",
 		"Control",
 		preload("res://addons/omni_term/src/terminal/terminal.gd"),
 		preload("res://addons/omni_term/assets/terminal_icon.png")
@@ -28,15 +24,11 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	if import_plugin:
-		remove_import_plugin(import_plugin)
-		import_plugin = null
-
-	remove_custom_type("Terminal")
+	remove_custom_type("OmniTerm")
 
 
 func _register_settings() -> void:
-	for setting_path: String in SETTINGS:
+	for setting_path in SETTINGS:
 		if not ProjectSettings.has_setting(setting_path):
 			ProjectSettings.set_setting(setting_path, SETTINGS[setting_path])
 
@@ -54,6 +46,11 @@ func _register_settings() -> void:
 		"hint": PROPERTY_HINT_DIR
 	})
 	ProjectSettings.add_property_info({
+		"name": "omni_term/paths/sounds",
+		"type": TYPE_STRING,
+		"hint": PROPERTY_HINT_DIR
+	})
+	ProjectSettings.add_property_info({
 		"name": "omni_term/paths/inline_elements",
 		"type": TYPE_STRING,
 		"hint": PROPERTY_HINT_DIR
@@ -62,5 +59,17 @@ func _register_settings() -> void:
 		"name": "omni_term/paths/custom_inputs",
 		"type": TYPE_STRING,
 		"hint": PROPERTY_HINT_DIR
+	})
+	ProjectSettings.add_property_info({
+		"name": "omni_system/theme/custom_theme",
+		"type": TYPE_STRING,
+		"hint": PROPERTY_HINT_FILE,
+		"hint_string": "*.theme"
+	})
+	ProjectSettings.add_property_info({
+		"name": "omni_system/theme/color_palette",
+		"type": TYPE_STRING,
+		"hint": PROPERTY_HINT_FILE,
+		"hint_string": "*.tres"
 	})
 	ProjectSettings.save()

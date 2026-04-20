@@ -1,8 +1,8 @@
 class_name CommandContext extends RefCounted
 
 
-var terminal: Terminal
+var terminal: OmniTerm
 
 
-func _init(_terminal: Terminal) -> void:
+func _init(_terminal: OmniTerm) -> void:
 	terminal = _terminal

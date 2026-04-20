@@ -14,9 +14,14 @@ config/name="execution-protocol-a-machine-edge-story"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
+[autoload]
+
+OmniNarrative="*uid://cgrp8a8t1b237"
+OmniSave="*uid://dv5wkhv5cldpf"
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/omni_term/plugin.cfg")
+enabled=PackedStringArray("res://addons/omni_chat/plugin.cfg", "res://addons/omni_narrative/plugin.cfg", "res://addons/omni_save/plugin.cfg", "res://addons/omni_term/plugin.cfg")
 
 [physics]
 
