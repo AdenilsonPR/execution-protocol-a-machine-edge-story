@@ -57,17 +57,24 @@ static func _validate_file(path: String, global_map: Dictionary, conflicts: Arra
 		printerr("OmniNarrative Validator: JSON syntax error in ", path, ": ", json.get_error_message())
 		return
 		
-	var data: Dictionary = json.data
-	if not data.has("nodes"):
-		return
-		
-	var nodes: Dictionary = data.nodes
+	var data: Variant = json.data
 	var file_errors: Array[String] = []
 	
-	for node_id: String in nodes:
-		var node_data: Dictionary = nodes[node_id]
-		_check_node_links(node_id, node_data, nodes, file_errors)
-		_check_duplicate_ids(node_id, node_data, path, content, global_map, conflicts)
+	# Check for duplicate IDs in the entire file structure
+	_check_duplicate_ids("", data, path, content, global_map, conflicts)
+
+	# If it's a narrative script, also validate node structure
+	if data is Dictionary and data.has("nodes"):
+		var nodes: Dictionary = data.nodes
+		
+		for node_id: String in nodes:
+			var node_data: Dictionary = nodes[node_id]
+			_check_node_links(node_id, node_data, nodes, file_errors)
+
+	if not file_errors.is_empty():
+		printerr("OmniNarrative Validator: Structure errors in ", path.get_file(), ":")
+		for err: String in file_errors:
+			printerr("  - ", err)
 
 	if not file_errors.is_empty():
 		printerr("OmniNarrative Validator: Structure errors in ", path.get_file(), ":")

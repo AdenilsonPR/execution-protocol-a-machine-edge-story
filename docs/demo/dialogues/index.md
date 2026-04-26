@@ -121,10 +121,10 @@ MISSAO 2 COMPLETA
 FALA COM VASQUEZ
     ├─ [1] Sobre o dispositivo → lore
     ├─ [2] Analisar
-    │   ├─ SEM drive → vai para LOJA (200 scraps)
+    │   ├─ SEM módulo → vai para LOJA (200 scraps)
     │   │   → volta para VASQUEZ
     │   │   → tenta novamente
-    │   └─ COM drive → descriptografa 87%
+    │   └─ COM módulo → descriptografa 87%
     ├─ [3] O que espera encontrar → flavor
     └─ [4] Sair
     ↓

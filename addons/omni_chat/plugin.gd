@@ -4,7 +4,10 @@ extends EditorPlugin
 
 const SETTINGS: Dictionary = {
 	"omni_chat/paths/effects": "res://omni_chat_custom/effects/",
-	"omni_chat/paths/sounds": "res://omni_chat_custom/sounds/"
+	"omni_chat/paths/sounds": "res://omni_chat_custom/sounds/",
+	"omni_chat/paths/custom_inputs": "res://omni_chat_custom/inputs/",
+	"omni_system/theme/custom_theme": "",
+	"omni_system/theme/color_palette": "res://addons/omni_term/assets/color_palettes/base_palette.tres"
 }
 
 
@@ -23,7 +26,7 @@ func _exit_tree() -> void:
 
 
 func _register_settings() -> void:
-	for setting_path in SETTINGS:
+	for setting_path: String in SETTINGS:
 		if not ProjectSettings.has_setting(setting_path):
 			ProjectSettings.set_setting(setting_path, SETTINGS[setting_path])
 
@@ -39,5 +42,22 @@ func _register_settings() -> void:
 		"name": "omni_chat/paths/sounds",
 		"type": TYPE_STRING,
 		"hint": PROPERTY_HINT_DIR
+	})
+	ProjectSettings.add_property_info({
+		"name": "omni_chat/paths/custom_inputs",
+		"type": TYPE_STRING,
+		"hint": PROPERTY_HINT_DIR
+	})
+	ProjectSettings.add_property_info({
+		"name": "omni_system/theme/custom_theme",
+		"type": TYPE_STRING,
+		"hint": PROPERTY_HINT_FILE,
+		"hint_string": "*.theme"
+	})
+	ProjectSettings.add_property_info({
+		"name": "omni_system/theme/color_palette",
+		"type": TYPE_STRING,
+		"hint": PROPERTY_HINT_FILE,
+		"hint_string": "*.tres"
 	})
 	ProjectSettings.save()

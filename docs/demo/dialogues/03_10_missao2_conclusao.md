@@ -60,7 +60,7 @@ VASQUEZ: "Entao por que esse dispositivo ainda existe?"
 
 ### [2] Analisar o dispositivo
 
-**Se jogador NÃO tem Drive de Leitura:**
+**Se jogador NÃO tem Módulo de Diagnóstico:**
 
 ```
 VASQUEZ: "O dispositivo tem conteudo."
@@ -71,38 +71,39 @@ VASQUEZ: "Mas esta criptografado."
 ╔══════════════════════════════════════╗
 ║ [BLOQUEADO]                          ║
 ╠══════════════════════════════════════╣
-║ Drive de leitura necessario.         ║
+║ Módulo de Diagnóstico Obsoleto       ║
+║ necessário para leitura de dados.    ║
 ║                                     ║
-║ Procure na loja.                    ║
+║ Procure na loja da base.             ║
 ║ Custo: 200 scraps                    ║
 ╚══════════════════════════════════════╝
 ```
 
 ```
-VASQUEZ: "Vai ate a loja e compra um drive."
-VASQUEZ: "Esse tipo de dispositivo usa criptografia padrao."
-VASQUEZ: "Um drive generico deve funcionar."
+VASQUEZ: "Os protocolos de segurança da base bloqueiam o acesso direto a esse tipo de dado."
+VASQUEZ: "Mas se você conseguir um Módulo de Diagnóstico Obsoleto na loja..."
+VASQUEZ: "Eu posso tentar uma leitura de baixo nível. O sistema raramente monitora o tráfego desse hardware antigo."
 ```
 
 **Próximo link**: [[03_10_missao2_conclusao|MENU VASQUEZ]]
 
 ---
 
-**Se jogador TEM Drive de Leitura (inventory check):**
+**Se jogador TEM Módulo de Diagnóstico (inventory check):**
 
 ```
-VASQUEZ: "Voce tem um drive!"
+VASQUEZ: "Voce tem o módulo!"
 VASQUEZ: "Deixa eu ver isso..."
 ```
 
 ```
-VASQUEZ: "Conectando drive ao dispositivo..."
+VASQUEZ: "Conectando módulo ao dispositivo..."
 VASQUEZ: "Iniciando leitura..."
 ```
 
 ```
 ╔══════════════════════════════════════╗
-║ DRIVE DE LEITURA DETECTADO           ║
+║ MODULO DE DIAGNOSTICO DETECTADO      ║
 ╠══════════════════════════════════════╣
 ║ [░░░░░░░░░░░░░░░░░░░░░░] 0%         ║
 ║                                     ║
@@ -196,11 +197,11 @@ MISSAO 2 CONCLUIDA
     ↓
 VASQUEZ oferece analisar dispositivo
     ↓
-[1] Ir a loja → comprar Drive (200 scraps)
+[1] Ir a loja → comprar Módulo (200 scraps)
     ↓
 VOLTAR A VASQUEZ
     ↓
-[2] Analisar dispositivo (com drive)
+[2] Analisar dispositivo (com módulo)
     ↓
 DESCRIPTOGRAFACAO (87%)
     ↓
@@ -212,7 +213,7 @@ FIM DA DEMO
 ## Notas
 
 - **Desbloqueia após**: [[03_09_missao2_inicio]]
-- **Drive na loja**: Necessario para acessar conteudo
+- **Módulo na loja**: Necessario para acessar conteudo
 - **Gancho**: 87% recovered, fragmento 8 faltando
 - **Próximo natural**: Jogo completo (buscar mais fragmentos)
 
@@ -220,13 +221,13 @@ FIM DA DEMO
 
 ## Inventario Check
 
-O jogo deve verificar se o jogador tem `drive_leitura` no inventario:
+O jogo deve verificar se o jogador tem `modulo_diagnostico` no inventario:
 
 ```
-if inventario.has("drive_leitura"):
-    → mostrar fluxo "com drive"
+if inventario.has("modulo_diagnostico"):
+    → mostrar fluxo "com módulo"
 else:
-    → mostrar fluxo "sem drive"
+    → mostrar fluxo "sem módulo"
 ```
 
 ---

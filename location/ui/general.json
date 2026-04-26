@@ -1,0 +1,16 @@
+{
+	"term": [
+		{
+			"id": "UI_USER",
+			"text": "usuario_2227"
+		},
+		{
+			"id": "UI_BASE_07",
+			"text": "posto_avancado_07"
+		},
+		{
+			"id": "CMD_ERR_NOT_FOUND",
+			"text": "Comando desconhecido: {cmd}"
+		}
+	]
+}

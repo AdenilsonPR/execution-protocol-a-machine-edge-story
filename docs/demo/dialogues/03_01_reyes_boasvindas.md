@@ -29,10 +29,11 @@
 ### [1] Missões
 
 ```
+REYES: "Bem vindo ao posto avançado 07, sua transferencia para esse posto foi um sucesso ou quase isso."
 REYES: "Voce esta operacional, #2227. Isso e o que importa."
 REYES: "Esse erro no driver optico... e so ruido de dados."
 REYES: "Voce nao precisa 'enxergar' para processar comandos, precisa?"
-REYES: "Foque no que voce consegue fazer, soldado."
+REYES: "Foque no que voce consegue fazer, recruta."
 ```
 
 **Próximo link**: [[03_02_reyes_tutorial]]

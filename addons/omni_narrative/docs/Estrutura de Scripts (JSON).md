@@ -4,19 +4,48 @@ A narrativa é definida em arquivos JSON compostos por um dicionário de `nodes`
 
 ## 🌍 Localização e Tradução
 
-Todos os campos de texto podem ser uma `String` simples ou um `Dictionary` para suportar chaves de tradução. O sistema prioriza o campo `id`.
+Todos os campos de texto suportam o formato de **Array de Objetos**. Isso é recomendado para textos longos, pois evita o uso de `\n` e permite que cada linha tenha seu próprio ID de tradução.
 
 **Formato Recomendado:**
 ```json
-"text": {
-    "id": "KEY_NAME",
-    "text": "Texto original em Português"
-}
+"text": [
+    { "id": "INTRO_L1", "text": "Bem-vindo ao Sistema Omni." },
+    { "id": "INTRO_L2", "text": "Acesso concedido ao terminal central." }
+]
 ```
+
+O sistema prioriza o campo `id`. Se a tradução não for encontrada, o campo `text` será usado como fallback.
 
 ---
 
 ## Tipos de Nós
+
+### 💻 Terminal Node (`"type": "terminal"`)
+Envia texto para o terminal OmniTerm.
+
+```json
+"terminal_log": {
+    "type": "terminal",
+    "text": [
+        { "id": "LOG_INIT", "text": "[omni_color=BLUE]Iniciando sistema...[/omni_color]" },
+        { "id": "LOG_AUTH", "text": "Autenticando credenciais..." }
+    ],
+    "next": "next_node",
+    "delay": 1.0
+}
+```
+
+### ⌨️ Terminal Input (`"type": "terminal_input"`)
+Prepara o terminal para receber um comando do jogador.
+
+```json
+"wait_cmd": {
+    "type": "terminal_input",
+    "text": [
+        { "id": "CMD_PROMPT", "text": "Aguardando entrada do usuário..." }
+    ]
+}
+```
 
 ### 💬 Chat Node (`"type": "chat"`)
 Exibe diálogos no sistema OmniChat.
@@ -24,7 +53,7 @@ Exibe diálogos no sistema OmniChat.
 ```json
 "node_id": {
     "type": "chat",
-    "contact": { "id": "MASTER_NAME", "text": "Mestre" },
+    "contact": { "id": "NPC_NAME", "text": "Mestre" },
     "messages": [
         { "id": "MSG_1", "text": "Finalmente voce conseguiu..." },
         { "id": "MSG_2", "text": "Eu sou o Mestre." }
@@ -36,53 +65,6 @@ Exibe diálogos no sistema OmniChat.
             "next": "next_node"
         }
     }
-}
-```
-
-### 💻 Terminal Node (`"type": "terminal"`)
-Envia texto para o terminal OmniTerm. Suporta uma linha simples ou múltiplas linhas.
-
-```json
-"terminal_log": {
-    "type": "terminal",
-    "id": "TERM_INIT",
-    "text": "[omni_color=BLUE]Iniciando sistema...[/omni_color]",
-    "next": "next_node",
-    "delay": 1.0
-}
-```
-
-**Múltiplas linhas:**
-```json
-"multi_line_intro": {
-    "type": "terminal",
-    "lines": [
-        { "id": "L1", "text": "Conectando...", "delay": 0.8 },
-        { "id": "L2", "text": "Autenticando...", "delay": 1.2 }
-    ],
-    "next": "next_node"
-}
-```
-
-### ⌨️ Terminal Input (`"type": "terminal_input"`)
-Prepara o terminal para receber um comando do jogador.
-
-```json
-"wait_cmd": {
-    "type": "terminal_input",
-    "id": "TERM_WAIT",
-    "text": "Aguardando comando..."
-}
-```
-
-### ⚡ Event Node (`"type": "event"`)
-Nó lógico para transições puras ou troca de arquivos.
-
-```json
-"go_to_act2": {
-    "type": "event",
-    "next_file": "res://narrative/act2.json",
-    "next_node": "start"
 }
 ```
 

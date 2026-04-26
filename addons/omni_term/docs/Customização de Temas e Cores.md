@@ -14,7 +14,7 @@ Você pode substituir o visual padrão do terminal criando seu próprio recurso 
 5.  O terminal carregará automaticamente este tema ao ser inicializado.
 
 > [!NOTE]
-> O terminal utiliza `RichTextLabel` para o log e `InputContainer` para a entrada. Se o seu tema não definir estilos específicos, o terminal usará o visual "retro" padrão.
+> O terminal utiliza `RichTextLabel` para o log e `InputContainer` para a entrada. Se o seu tema não definir estilos específicos, o terminal usará o visual padrão (Fonte VT323 e cores NEUTRAL).
 
 ---
 
@@ -34,19 +34,15 @@ Você pode usar a tag customizada `[omni_color]` nos seus textos de comando ou r
 - `NEUTRAL`: Escala de cinzas (0 a 6).
 - `RED`, `GREEN`, `BLUE`, `YELLOW`, `CYAN`, `MAGENTA`.
 
-As cores são definidas no script `res://addons/omni_term/src/terminal/utils/colors.gd`.
-
 ---
 
-## 3. Fontes e Efeitos
+## 3. Fontes e Efeitos Customizados
 
 ### Fontes:
-A fonte padrão é a **VT323-Regular.ttf**. Para alterá-la, você pode:
-- Definir uma fonte global no seu `custom_theme`.
-- Ou substituir o arquivo em `res://addons/omni_term/assets/fonts/`.
+A fonte padrão é a **VT323-Regular.ttf**. Para alterá-la, defina uma fonte global no seu `custom_theme`.
 
-### Efeito Typewriter:
-O efeito de digitação pode ser controlado diretamente no texto:
-`[typewriter s=50 v="som_customizado"]Sua mensagem aqui...[/typewriter]`
-- `s`: Velocidade (caracteres por segundo).
-- `v`: Nome do arquivo de som em `res://omni_term_custom/sounds/`.
+### Efeitos de Texto:
+O OmniTerm é puramente estático por padrão (exibição instantânea). Se você deseja animações (como tremer, ondular ou digitação), você deve:
+1.  Criar um script que herde de `RichTextEffect`.
+2.  Configurar o caminho da pasta de efeitos em `Project Settings -> omni_term/paths/effects`.
+3.  O terminal carregará e registrará esses efeitos automaticamente para uso via BBCode.

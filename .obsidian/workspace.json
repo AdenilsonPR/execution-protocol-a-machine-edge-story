@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/demo/tasks/task_002_autoloads.md",
+                "file": "docs/demo/dialogues/03_01_reyes_boasvindas.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "task_002_autoloads"
+              "title": "03_01_reyes_boasvindas"
             }
           }
         ]
@@ -185,6 +185,19 @@
   },
   "active": "22c92f1ffa2aca43",
   "lastOpenFiles": [
+    "src/main.tscn-FGda15",
+    "location/narrative/commander_reyes/intro_commander_reyes.json",
+    "location/narrative/commander_reyes",
+    "docs/demo/dialogues/01_00_boot.md",
+    "src/main.tscn-dItVRS",
+    "src/main.tscn-5pGYTn",
+    "src/main.tscn-E2ezR4",
+    "src/main.tscn-b3yfWL",
+    "src/main.tscn-cNsBqS",
+    "src/main.tscn-8NHi6Z",
+    "src/main.tscn-KNoSJF",
+    "src/main.tscn-0i8UQU",
+    "docs/demo/tasks/task_002_autoloads.md",
     "docs/demo/docs/shop/04_oficina_status.md",
     "docs/demo/docs/shop/04_loja_inventario.md",
     "docs/demo/docs/terminal/02_mapa_combate.md",
@@ -194,7 +207,6 @@
     "docs/demo/tasks/task_001_estrutura_base.md",
     "docs/demo/tasks/index.md",
     "task_001_estrutura_base&.md",
-    "docs/demo/dialogues/01_00_boot.md",
     "docs/demo/tasks/task_010_testes.md",
     "docs/demo/tasks/task_009_narrativa.md",
     "docs/demo/tasks/task_008_inventario.md",
@@ -203,23 +215,11 @@
     "docs/demo/tasks/task_005_chat_painel.md",
     "docs/demo/tasks/task_004_terminal_layout.md",
     "docs/demo/tasks/task_003_terminal_comandos.md",
-    "docs/demo/tasks/task_002_autoloads.md",
     "docs/demo/docs/narrativa/Ideia de narrativa para demo.md",
     "docs/demo/docs/implementacao/plano_de_implementacao.md",
     "docs/demo/docs/chat/09_chat_comportamento.md",
     "docs/demo/docs/implementacao/08_implementacao.md",
     "docs/demo/docs/save/07_save.md",
-    "docs/demo/docs/narrativa/06_decryption.md",
-    "docs/demo/docs/chat/05_chat.md",
-    "docs/demo/tasks",
-    "docs/demo/docs/terminal",
-    "docs/demo/docs/shop",
-    "docs/demo/docs/save",
-    "docs/demo/docs/narrativa",
-    "docs/demo/docs/implementacao",
-    "docs/demo/docs/combate",
-    "docs/demo/docs/chat",
-    "docs/demo/docs",
-    "docs/demo"
+    "docs/demo/docs/narrativa/06_decryption.md"
   ]
 }

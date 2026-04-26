@@ -68,6 +68,9 @@
 
 > Adicionado ao inventario:
 > [OBJETO DESCONHECIDO]
+
+[SISTEMA] Artefato Anômalo detectado.
+[SISTEMA] Notificação enviada à divisão de pesquisa (Dra. Vasquez).
 ```
 
 ---

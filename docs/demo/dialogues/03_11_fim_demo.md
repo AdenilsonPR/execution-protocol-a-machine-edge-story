@@ -6,10 +6,10 @@
 
 ---
 
-## Dispositivo (Se comprado Drive)
+## Dispositivo (Se comprado Módulo)
 
 ```
-> USAR DRIVE DE LEITURA...
+> USAR MODULO DE DIAGNOSTICO...
 
 ╔══════════════════════════════════════╗
 ║ DISPOSITIVO CRIPTOGRAFADO           ║
@@ -19,10 +19,10 @@
 ║ Fragmentos descriptografados: 0/8  ║
 ║ Fragmento 0: [ERRO]                 ║
 ║                                     ║
-║ Drive detectado, mas conteudo      ║
-║ continua criptografado.            ║
+║ Modulo detectado. Erro de leitura:  ║
+║ Assinatura de segurança ausente.    ║
 ║                                     ║
-║ NECESSARIO: Auxilio de especialista ║
+║ NECESSARIO: Sequência de Bypass     ║
 ╚══════════════════════════════════════╝
 ```
 
@@ -31,7 +31,7 @@
 ## Texto Final
 
 ```
-> USAR DRIVE DE LEITURA...
+> USAR MODULO DE DIAGNOSTICO...
 > [ARQUIVO_RECUPERADO_FRAGMENTO_7]: 
 
 "Se voce esta lendo isso, a transferencia falhou."

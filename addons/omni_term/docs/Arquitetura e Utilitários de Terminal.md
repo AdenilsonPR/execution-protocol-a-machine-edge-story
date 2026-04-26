@@ -31,11 +31,29 @@ func execute(_args: PackedStringArray, context: CommandContext) -> CommandOutput
     return CommandOutput.create("Iniciando interface customizada...")
 ```
 
-O nó injetado ficará no topo do log e receberá o foco automaticamente. Quando sua UI terminar, ela deve se encarregar de chamar `terminal.create_new_line()` para devolver o controle ao jogador.
+---
+
+### 3. Personalização Externa com `label_added`
+
+O terminal é estático por padrão, mas emite o sinal `label_added(label: RichTextLabel)` sempre que uma nova linha é criada. Você pode usar este sinal no script do seu jogo para aplicar animações ou sons customizados.
+
+**Exemplo de Implementação de Som/Animação:**
+```gdscript
+func _on_terminal_label_added(label: RichTextLabel) -> void:
+    # Exemplo: Efeito simples de fade-in
+    label.modulate.a = 0
+    var tween = create_tween()
+    tween.tween_property(label, "modulate:a", 1.0, 0.5)
+    
+    # Exemplo: Tocar um som de 'bip' para cada nova linha
+    $AudioPlayer.play()
+```
+
+Isso permite que você crie o visual e a sonoplastia que desejar sem precisar modificar o código do plugin.
 
 ---
 
-### 3. Limpando a Tela (`clear_terminal`)
+### 4. Limpando a Tela (`clear_terminal`)
 
 Você pode limpar todo o histórico visual do terminal a qualquer momento.
 
@@ -48,15 +66,15 @@ func execute(_args: PackedStringArray, context: CommandContext) -> CommandOutput
 
 ---
 
-### 4. Autocomplete e Ghost Text (Sugestões)
+### 5. Autocomplete e Ghost Text (Sugestões)
 
-Inspirado no *Fish Shell*, o OmniTerm oferece sugestões em tempo real.
-- **Visual**: Um texto cinza semitransparente sugere o comando.
+O OmniTerm oferece sugestões em tempo real.
+- **Visual**: Um texto cinza sugere o comando correspondente.
 - **Interação**: Pressione **Tab** para aceitar a sugestão.
 
 ---
 
-### 5. Histórico de Comandos (UX)
+### 6. Histórico de Comandos (UX)
 
 O terminal armazena automaticamente os comandos digitados.
 - **Seta para Cima**: Comando anterior.

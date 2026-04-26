@@ -5,6 +5,7 @@ class_name OmniTerm extends Control
 
 signal action_triggered(action_id: String)
 signal output_rendered(text: String)
+signal label_added(label: RichTextLabel)
 
 
 enum InputMode {
@@ -15,7 +16,6 @@ enum InputMode {
 
 
 const _INPUT_COMMAND: PackedScene = preload("res://addons/omni_term/src/terminal/components/input_container/input_container.tscn")
-const TYPING_SPEED_MS: float = 0.01
 
 
 var command_processor: CommandProcessor
@@ -28,8 +28,6 @@ var _scroll_node: ScrollContainer
 var _username: String = "user"
 var _hostname: String = "local"
 var _custom_effects: Array = []
-var _audio_player: AudioStreamPlayer
-var _audio_cache: Dictionary = {}
 var _is_locked: bool = false
 var _output_queue: Array[CommandOutput] = []
 var _is_rendering: bool = false
@@ -37,13 +35,7 @@ var _is_rendering: bool = false
 
 func _ready() -> void:
 	_setup_ui()
-	_setup_audio()
 	_load_custom_effects()
-
-	if _custom_effects.is_empty():
-		var fallback_script: GDScript = load("res://omni_term_custom/effects/speed.gd")
-		if fallback_script:
-			_custom_effects.append(fallback_script.new())
 
 	if Engine.is_editor_hint():
 		return
@@ -57,13 +49,13 @@ func _ready() -> void:
 
 func _load_custom_effects() -> void:
 	_custom_effects.clear()
-	var path: String = ProjectSettings.get_setting("omni_term/paths/effects", "res://omni_term_custom/effects/")
+	var path: String = ProjectSettings.get_setting("omni_term/paths/effects", "res://src/scripts/effects/")
+
+	if path == "" or not DirAccess.dir_exists_absolute(path):
+		return
 
 	if not path.ends_with("/"):
 		path += "/"
-
-	if not DirAccess.dir_exists_absolute(path):
-		return
 
 	var dir: DirAccess = DirAccess.open(path)
 	if not dir:
@@ -74,21 +66,28 @@ func _load_custom_effects() -> void:
 
 	while file_name != "":
 		if not dir.current_is_dir() and file_name.ends_with(".gd"):
-			var effect_script: GDScript = load(path + file_name)
+			var full_path: String = path + file_name
+			var effect_script: GDScript = load(full_path)
+			
 			if effect_script:
 				var effect_instance: Variant = effect_script.new()
-				if effect_instance and "bbcode" in effect_instance:
+				
+				if effect_instance and effect_instance is RichTextEffect:
 					_custom_effects.append(effect_instance)
+				else:
+					push_error("OmniTerm: Script is not a valid RichTextEffect at: " + full_path)
+			else:
+				push_error("OmniTerm: Failed to load effect script at: " + full_path)
 
 		file_name = dir.get_next()
 
 
 func set_username(new_username: String) -> void:
-	_username = new_username
+	_username = tr(new_username)
 
 
 func set_hostname(new_hostname: String) -> void:
-	_hostname = new_hostname
+	_hostname = tr(new_hostname)
 
 
 func _setup_ui() -> void:
@@ -144,10 +143,14 @@ func _setup_theme() -> void:
 			return
 
 	var default_theme: Theme = Theme.new()
-	var font: FontFile = load("res://addons/omni_term/assets/fonts/VT323-Regular.ttf")
+	var font_path: String = "res://addons/omni_term/assets/fonts/VT323-Regular.ttf"
+	
+	if ResourceLoader.exists(font_path):
+		var font: FontFile = load(font_path)
+		default_theme.set_font("normal_font", "RichTextLabel", font)
+		
 	var base_color: Color = Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 6))
 
-	default_theme.set_font("normal_font", "RichTextLabel", font)
 	default_theme.set_font_size("normal_font_size", "RichTextLabel", 24)
 	default_theme.set_color("default_color", "RichTextLabel", base_color)
 
@@ -185,30 +188,6 @@ func _setup_theme() -> void:
 	default_theme.set_constant("separation", "VBoxContainer", 8)
 
 	self.theme = default_theme
-
-
-func _setup_audio() -> void:
-	if _audio_player:
-		return
-
-	_audio_player = AudioStreamPlayer.new()
-	_audio_player.bus = "SFX"
-	add_child(_audio_player)
-
-	_load_sound("typewriter")
-
-
-func _load_sound(sound_name: String) -> AudioStream:
-	if _audio_cache.has(sound_name):
-		return _audio_cache[sound_name]
-
-	var path: String = "res://omni_term_custom/sounds/" + sound_name + ".wav"
-	if FileAccess.file_exists(path):
-		var stream: AudioStream = load(path)
-		_audio_cache[sound_name] = stream
-		return stream
-	
-	return null
 
 
 func lock() -> void:
@@ -275,7 +254,7 @@ func _freeze_node(node: Node) -> void:
 
 
 func write_line(text: String) -> void:
-	await render_output(CommandOutput.create(text))
+	render_output(CommandOutput.create(text))
 
 
 func inject_custom_input(input_node: Control) -> void:
@@ -294,9 +273,6 @@ func render_output(output_data: CommandOutput) -> void:
 	_output_queue.append(output_data)
 
 	if _is_rendering:
-		while _is_rendering:
-			await get_tree().process_frame
-
 		return
 
 	_is_rendering = true
@@ -318,15 +294,37 @@ func _process_output(output_data: CommandOutput) -> void:
 	label.bbcode_enabled = true
 	label.fit_content = true
 
-	for effect: Variant in _custom_effects:
-		label.custom_effects.append(effect)
+	var active_effects: Array = []
+	for effect in _custom_effects:
+		var effect_clone = effect.duplicate()
+		label.install_effect(effect_clone)
+		active_effects.append(effect_clone)
 
 	_add_to_log(label)
-	label.text = _preprocess_text(output_data.text)
+	label.append_text(_preprocess_text(output_data.text))
+
+	label_added.emit(label)
+	_scroll_to_bottom()
+
+	var has_pending_effects: bool = true
+	var text_lower: String = output_data.text.to_lower()
+	
+	while has_pending_effects:
+		has_pending_effects = false
+		for effect in active_effects:
+			if "bbcode" in effect and ("[" + effect.bbcode.to_lower()) not in text_lower:
+				continue
+				
+			if "is_finished" in effect and not effect.is_finished:
+				has_pending_effects = true
+				break
+				
+		if has_pending_effects:
+			await get_tree().process_frame
+
+	await get_tree().create_timer(0.1).timeout
 
 	output_rendered.emit(output_data.text)
-	await _type_text(label, 0.0)
-	_scroll_to_bottom()
 
 
 func clear_terminal() -> void:
@@ -382,54 +380,6 @@ func _scroll_to_bottom() -> void:
 	_scroll_node.scroll_vertical = int(_scroll_node.get_v_scroll_bar().max_value)
 
 
-func _type_text(label: RichTextLabel, delay: float) -> void:
-	var base_delay: float = delay if delay > 0 else TYPING_SPEED_MS
-	var current_delay: float = base_delay
-	var speed_map: Dictionary = {}
-
-	var regex: RegEx = RegEx.new()
-	regex.compile("\\[typewriter s=([\\d.]+)(?: v=\"([^\"]+)\")?\\]")
-
-	var strip_regex: RegEx = RegEx.new()
-	strip_regex.compile("\\[.*?\\]")
-
-	var raw_text: String = label.text
-	for m: RegExMatch in regex.search_all(raw_text):
-		var s_val: float = m.get_string(1).to_float()
-		var sound_name: String = m.get_string(2)
-
-		var prefix: String = raw_text.left(m.get_start())
-		var clean_prefix: String = strip_regex.sub(prefix, "", true)
-		var parsed_index: int = clean_prefix.length()
-
-		speed_map[parsed_index] = {
-			"delay": 1.0 / s_val if s_val > 0 else base_delay,
-			"sound": sound_name if not sound_name.is_empty() else "typewriter"
-		}
-
-	label.visible_ratio = 0.0
-	await get_tree().process_frame
-	await get_tree().process_frame
-	
-	var total_chars: int = label.get_total_character_count()
-
-	for i: int in range(total_chars + 1):
-		label.visible_characters = i
-
-		if speed_map.has(i):
-			current_delay = speed_map[i].delay
-			_audio_player.stream = _load_sound(speed_map[i].sound)
-
-		if current_delay > 0:
-			if _audio_player.stream and i > 0:
-				_audio_player.pitch_scale = randf_range(0.8, 1.2)
-				_audio_player.play()
-
-			await get_tree().create_timer(current_delay).timeout
-		
-		_scroll_to_bottom()
-
-
 func _on_input_changed(new_text: String) -> void:
 	if _mode != InputMode.COMMAND or not _current_input:
 		return
@@ -459,10 +409,10 @@ func _on_input_submitted(input_text: String) -> void:
 	if _current_input.has_method("disable"):
 		_current_input.disable()
 
-	var cmd_context: CommandContext = CommandContext.new(self)
+	var cmd_context: CommandContext = CommandContext.new(self )
 	var cmd_output: CommandOutput = command_processor.process(input_text, cmd_context)
 
-	await render_output(cmd_output)
+	render_output(cmd_output)
 
 	if _mode == InputMode.COMMAND:
 		create_new_line()
@@ -521,7 +471,7 @@ func _get_all_suggestions(prefix_text: String) -> Array[String]:
 		if command_processor.has_command(cmd_name):
 			var command: CommandBase = command_processor.get_commands()[cmd_name]
 			var args: PackedStringArray = PackedStringArray(parts.slice(1))
-			var context: CommandContext = CommandContext.new(self)
+			var context: CommandContext = CommandContext.new(self )
 			var cmd_suggestions: PackedStringArray = command.get_suggestions(args, context)
 
 			var last_part: String = "" if prefix_text.ends_with(" ") else parts[-1].to_lower()

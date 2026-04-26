@@ -163,8 +163,14 @@ func _handle_terminal_node(data: Dictionary) -> void:
 
 			await _terminal_node.render_output(CommandOutput.create(line_text))
 			await get_tree().create_timer(line_delay).timeout
-	else:
-		await _terminal_node.render_output(CommandOutput.create(_format_text(data)))
+	if data.has("text"):
+		var text_data: Variant = data["text"]
+		
+		if text_data is Array:
+			for line_data: Variant in text_data:
+				await _terminal_node.render_output(CommandOutput.create(_format_text(line_data)))
+		else:
+			await _terminal_node.render_output(CommandOutput.create(_format_text(text_data)))
 
 	if data.has("next"):
 		var next_id: String = data.next
@@ -183,7 +189,13 @@ func _handle_terminal_input_node(data: Dictionary) -> void:
 		return
 
 	if data.has("text"):
-		await _terminal_node.render_output(CommandOutput.create(_format_text(data)))
+		var text_data: Variant = data["text"]
+		
+		if text_data is Array:
+			for line_data: Variant in text_data:
+				await _terminal_node.render_output(CommandOutput.create(_format_text(line_data)))
+		else:
+			await _terminal_node.render_output(CommandOutput.create(_format_text(data)))
 
 	_terminal_node.unlock()
 	_terminal_node.activate()

@@ -28,7 +28,7 @@ func process(raw_input: String, context: CommandContext) -> CommandOutput:
 	var args: PackedStringArray = PackedStringArray(parts.slice(1))
 
 	if not _commands.has(cmd_name):
-		return CommandOutput.create("CMD_ERR_NOT_FOUND: " + cmd_name)
+		return CommandOutput.create(tr("CMD_ERR_NOT_FOUND").format({"cmd": cmd_name}))
 
 	var command: CommandBase = _commands[cmd_name]
 

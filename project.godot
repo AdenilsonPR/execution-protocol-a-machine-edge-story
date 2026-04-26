@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="execution-protocol-a-machine-edge-story"
+run/main_scene="uid://bypxb6i7ry4w2"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
@@ -22,6 +23,19 @@ OmniSave="*uid://dv5wkhv5cldpf"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/omni_chat/plugin.cfg", "res://addons/omni_narrative/plugin.cfg", "res://addons/omni_save/plugin.cfg", "res://addons/omni_term/plugin.cfg")
+
+[omni_chat]
+
+paths/effects="res://src/scripts/effects/"
+
+[omni_narrative]
+
+paths/dialogues="res://location/"
+paths/translations="res://location/translation/"
+
+[omni_term]
+
+paths/effects="res://src/scripts/effects/"
 
 [physics]
 

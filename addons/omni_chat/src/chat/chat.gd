@@ -76,7 +76,7 @@ func _ready() -> void:
 
 func _load_custom_effects() -> void:
 	_custom_effects.clear()
-	var path: String = ProjectSettings.get_setting("omni_chat/paths/effects", "res://omni_chat_custom/effects/")
+	var path: String = ProjectSettings.get_setting("omni_chat/paths/effects", "res://src/scripts/effects/")
 	
 	if not path.ends_with("/"):
 		path += "/"
