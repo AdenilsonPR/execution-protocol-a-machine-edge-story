@@ -185,6 +185,8 @@
   },
   "active": "22c92f1ffa2aca43",
   "lastOpenFiles": [
+    "addons/omni_term/src/terminal/components/input_container/input_container.tscn-YZX2AF",
+    "addons/omni_term/src/terminal/components/input_container/input_container.tscn-vkC1IV",
     "src/main.tscn-FGda15",
     "location/narrative/commander_reyes/intro_commander_reyes.json",
     "location/narrative/commander_reyes",
@@ -195,8 +197,6 @@
     "src/main.tscn-b3yfWL",
     "src/main.tscn-cNsBqS",
     "src/main.tscn-8NHi6Z",
-    "src/main.tscn-KNoSJF",
-    "src/main.tscn-0i8UQU",
     "docs/demo/tasks/task_002_autoloads.md",
     "docs/demo/docs/shop/04_oficina_status.md",
     "docs/demo/docs/shop/04_loja_inventario.md",

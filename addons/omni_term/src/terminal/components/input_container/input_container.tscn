@@ -25,11 +25,11 @@ theme_override_fonts/bold_font = ExtResource("2_o4g2v")
 theme_override_fonts/bold_italics_font = ExtResource("2_o4g2v")
 theme_override_fonts/italics_font = ExtResource("2_o4g2v")
 theme_override_fonts/mono_font = ExtResource("2_o4g2v")
-theme_override_font_sizes/normal_font_size = 24
-theme_override_font_sizes/bold_font_size = 24
-theme_override_font_sizes/bold_italics_font_size = 24
-theme_override_font_sizes/italics_font_size = 24
-theme_override_font_sizes/mono_font_size = 24
+theme_override_font_sizes/normal_font_size = 18
+theme_override_font_sizes/bold_font_size = 18
+theme_override_font_sizes/bold_italics_font_size = 18
+theme_override_font_sizes/italics_font_size = 18
+theme_override_font_sizes/mono_font_size = 18
 bbcode_enabled = true
 text = "user@local:"
 fit_content = true
@@ -41,7 +41,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.50980395, 0.46666667, 0.39215687, 1)
 theme_override_fonts/font = ExtResource("2_o4g2v")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 18
 text = ">"
 
 [node name="Control" type="Control" parent="HBoxContainer" unique_id=111111]
@@ -57,7 +57,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.2)
 theme_override_fonts/font = ExtResource("2_o4g2v")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 18
 vertical_alignment = 1
 
 [node name="LineEdit" type="LineEdit" parent="HBoxContainer/Control" unique_id=240084607]
@@ -73,7 +73,7 @@ theme_override_colors/font_uneditable_color = Color(0.8666667, 0.78039217, 0.631
 theme_override_colors/caret_color = Color(0.8666667, 0.78039217, 0.6313726, 1)
 theme_override_constants/caret_width = 8
 theme_override_fonts/font = ExtResource("2_o4g2v")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxEmpty_s1m3i")
 theme_override_styles/read_only = SubResource("StyleBoxEmpty_276aj")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_tjmjl")

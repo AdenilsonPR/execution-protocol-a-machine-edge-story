@@ -12,7 +12,7 @@ signal reminder_triggered(contact_name: String)
 signal choices_offered(choices: Dictionary)
 
 
-@export var interactive: bool = true:
+@export var interactive: bool = false:
 	set(value):
 		interactive = value
 		_update_interaction_mode()
@@ -146,7 +146,7 @@ func _setup_chat_ui(parent: VBoxContainer) -> void:
 	var top_style: StyleBoxFlat = StyleBoxFlat.new()
 	top_style.bg_color = Color(0, 0, 0, 0)
 	top_style.border_width_bottom = 2
-	top_style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 2))
+	top_style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 3))
 	top_bar.add_theme_stylebox_override("panel", top_style)
 	parent.add_child(top_bar)
 	
@@ -187,7 +187,7 @@ func _setup_chat_ui(parent: VBoxContainer) -> void:
 	
 	_name_label = Label.new()
 	_name_label.add_theme_font_override("font", font)
-	_name_label.add_theme_font_size_override("font_size", 24)
+	_name_label.add_theme_font_size_override("font_size", 18)
 	_name_label.add_theme_color_override("font_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 	top_hbox.add_child(_name_label)
 	
@@ -216,7 +216,7 @@ func _setup_chat_ui(parent: VBoxContainer) -> void:
 	var bottom_style: StyleBoxFlat = StyleBoxFlat.new()
 	bottom_style.bg_color = Color(0, 0, 0, 0)
 	bottom_style.border_width_top = 2
-	bottom_style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 2))
+	bottom_style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 3))
 	
 	_bottom_bar.add_theme_stylebox_override("panel", bottom_style)
 	parent.add_child(_bottom_bar)
@@ -239,7 +239,7 @@ func _setup_chat_ui(parent: VBoxContainer) -> void:
 	_placeholder_hint.flat = true
 	_placeholder_hint.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_placeholder_hint.add_theme_font_override("font", font)
-	_placeholder_hint.add_theme_font_size_override("font_size", 24)
+	_placeholder_hint.add_theme_font_size_override("font_size", 18)
 	_placeholder_hint.add_theme_color_override("font_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 5)))
 	_placeholder_hint.add_theme_color_override("font_hover_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 	_placeholder_hint.add_theme_color_override("font_pressed_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
@@ -260,7 +260,7 @@ func _setup_list_ui(parent: VBoxContainer) -> void:
 	var top_style: StyleBoxFlat = StyleBoxFlat.new()
 	top_style.bg_color = Color(0, 0, 0, 0)
 	top_style.border_width_bottom = 2
-	top_style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 2))
+	top_style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 3))
 	top_bar.add_theme_stylebox_override("panel", top_style)
 	parent.add_child(top_bar)
 	
@@ -269,7 +269,7 @@ func _setup_list_ui(parent: VBoxContainer) -> void:
 	
 	var font: FontFile = _get_main_font()
 	label.add_theme_font_override("font", font)
-	label.add_theme_font_size_override("font_size", 24)
+	label.add_theme_font_size_override("font_size", 18)
 	label.add_theme_color_override("font_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -506,7 +506,7 @@ func _refresh_list() -> void:
 	for contact_name: String in _conversations:
 		var data: Dictionary = _conversations[contact_name]
 		var btn: Button = Button.new()
-		btn.custom_minimum_size.y = 80
+		btn.custom_minimum_size.y = 56
 		btn.flat = true
 		
 		var hbox: HBoxContainer = HBoxContainer.new()
@@ -521,7 +521,7 @@ func _refresh_list() -> void:
 		hbox.add_child(margin)
 		
 		var avatar: TextureRect = TextureRect.new()
-		avatar.custom_minimum_size = Vector2(56, 56)
+		avatar.custom_minimum_size = Vector2(32, 32)
 		avatar.texture = data.avatar
 		avatar.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		avatar.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -537,7 +537,7 @@ func _refresh_list() -> void:
 		var name_lbl: Label = Label.new()
 		name_lbl.text = contact_name
 		name_lbl.add_theme_font_override("font", font)
-		name_lbl.add_theme_font_size_override("font_size", 24)
+		name_lbl.add_theme_font_size_override("font_size", 18)
 		name_lbl.add_theme_color_override("font_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 		vbox.add_child(name_lbl)
 		
@@ -547,10 +547,13 @@ func _refresh_list() -> void:
 		regex.compile("\\[.*?\\]")
 		clean_text = regex.sub(clean_text, "", true)
 		
-		var preview_text: String = clean_text.split("\n")[0].left(35)
-		last_lbl.text = preview_text + "..." if preview_text.length() >= 35 else preview_text
+		var first_line: String = clean_text.split("\n")[0]
+		if first_line.length() > 30:
+			last_lbl.text = first_line.left(27) + "..."
+		else:
+			last_lbl.text = first_line
 		last_lbl.add_theme_font_override("font", font)
-		last_lbl.add_theme_font_size_override("font_size", 18)
+		last_lbl.add_theme_font_size_override("font_size", 12)
 		last_lbl.add_theme_color_override("font_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 4)))
 		vbox.add_child(last_lbl)
 		
@@ -590,7 +593,7 @@ func _refresh_list() -> void:
 		
 		var separator: ColorRect = ColorRect.new()
 		separator.custom_minimum_size.y = 2
-		separator.color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 2))
+		separator.color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 3))
 		
 		_list_container.add_child(btn)
 		_list_container.add_child(separator)
@@ -625,7 +628,7 @@ func display_choices(choices: Dictionary) -> void:
 		
 		var font: FontFile = _get_main_font()
 		btn.add_theme_font_override("font", font)
-		btn.add_theme_font_size_override("font_size", 24)
+		btn.add_theme_font_size_override("font_size", 18)
 		btn.add_theme_color_override("font_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 		btn.add_theme_color_override("font_hover_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 		
@@ -635,7 +638,7 @@ func display_choices(choices: Dictionary) -> void:
 		style_normal.border_width_top = 2
 		style_normal.border_width_right = 2
 		style_normal.border_width_bottom = 2
-		style_normal.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 2))
+		style_normal.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 3))
 		style_normal.corner_radius_top_left = 12
 		style_normal.corner_radius_top_right = 12
 		style_normal.corner_radius_bottom_left = 12
@@ -705,7 +708,7 @@ func _create_bubble(text: String, is_player: bool) -> PanelContainer:
 	style.border_width_top = 2
 	style.border_width_right = 2
 	style.border_width_bottom = 2
-	style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 2))
+	style.border_color = Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 3))
 	
 	if is_player:
 		bubble.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -723,16 +726,16 @@ func _create_bubble(text: String, is_player: bool) -> PanelContainer:
 		
 	var font: FontFile = _get_main_font()
 	var clean_text: String = RegEx.create_from_string("\\[.*?\\]").sub(text, "", true)
-	var text_width: float = font.get_string_size(clean_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
+	var text_width: float = font.get_string_size(clean_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 	
-	if text_width > 280:
-		label.custom_minimum_size = Vector2(280, 0)
+	if text_width > 240:
+		label.custom_minimum_size = Vector2(240, 0)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	else:
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		
 	label.add_theme_font_override("normal_font", font)
-	label.add_theme_font_size_override("normal_font_size", 24)
+	label.add_theme_font_size_override("normal_font_size", 18)
 	label.add_theme_color_override("default_color", Color(ColorChat.get_color(ColorChat.Name.NEUTRAL, 6)))
 	
 	bubble.add_child(label)

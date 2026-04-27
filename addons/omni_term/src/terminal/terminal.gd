@@ -151,7 +151,7 @@ func _setup_theme() -> void:
 		
 	var base_color: Color = Color(ColorTerm.get_color(ColorTerm.Name.NEUTRAL, 6))
 
-	default_theme.set_font_size("normal_font_size", "RichTextLabel", 24)
+	default_theme.set_font_size("normal_font_size", "RichTextLabel", 18)
 	default_theme.set_color("default_color", "RichTextLabel", base_color)
 
 	var grabber_normal: StyleBoxFlat = StyleBoxFlat.new()

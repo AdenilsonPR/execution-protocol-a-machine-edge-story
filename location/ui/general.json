@@ -11,6 +11,26 @@
 		{
 			"id": "CMD_ERR_NOT_FOUND",
 			"text": "Comando desconhecido: {cmd}"
+		},
+		{
+			"id": "HELP_COMMAND",
+			"text": "ajuda"
+		},
+		{
+			"id": "HELP_COMMAND_DESCRIPTION",
+			"text": "Exibe todos os comandos registrados."
+		},
+		{
+			"id": "CHAT_UI_TITLE",
+			"text": "OmniChat"
+		},
+		{
+			"id": "CHAT_COMMAND",
+			"text": "conversa"
+		},
+		{
+			"id": "CHAT_COMMAND_DESCRIPTION",
+			"text": "Lista todas as convesas ou abri uma conversa específica. [Digite [omni_color=YELLOW]conversa[/omni_color] para ver o manual]."
 		}
 	]
 }

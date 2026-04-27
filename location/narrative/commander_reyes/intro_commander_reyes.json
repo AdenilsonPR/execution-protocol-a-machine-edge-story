@@ -1,5 +1,22 @@
 {
+	"start_node": "welcome",
 	"nodes": {
+		"welcome": {
+			"type": "chat",
+			"contact": "comandante_reyes",
+			"messages": [
+				{
+					"id": "COMANDER_WELCOME",
+					"text": "Unidade #2227, você está online. Consegue me ouvir?"
+				}
+			],
+			"triggers": [
+				{
+					"condition": "var:notification_shown == true",
+					"next": "wait_input"
+				}
+			]
+		},
 		"wait_input": {
 			"type": "terminal_input"
 		}

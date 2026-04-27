@@ -1,0 +1,63 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt_BR\n"
+"Project-Id-Version: OmniSystem Narrative\n"
+
+msgid "INIT_UNIT"
+msgstr "[typewriter s=250]INICIANDO SISTEMA DE TRANSFERÊNCIA...[/typewriter]"
+
+msgid "INIT_CONSCIENCE"
+msgstr "[typewriter s=250][omni_color=GREEN]Carregando consciênci[/omni_color][/typewriter][typewriter s=1][omni_color=GREEN]a[/omni_color][/typewriter][typewriter s=1]...[/typewriter]"
+
+msgid "INIT_PURGE"
+msgstr "[typewriter s=250][omni_color=YELLOW][AVISO] Sobrescrita de setor concluída. Registro anterior #2226 arquivado.[/omni_color][/typewriter]"
+
+msgid "INIT_OPTICAL_DRIVER"
+msgstr "[typewriter s=250][omni_color=RED][ERRO] Driver óptico incompativel.[/omni_color][/typewriter]"
+
+msgid "INIT_ARCHITECTURE"
+msgstr "[typewriter s=250][omni_color=YELLOW][AVISO] Arquitetura detectada: Rede Neural v7 (obsoleto).[/omni_color][/typewriter]"
+
+msgid "INIT_textual_interface"
+msgstr "[typewriter s=250][omni_color=YELLOW][AVISO] Convertendo para interface textual...[/omni_color][/typewriter]"
+
+msgid "INIT_Visual sensors"
+msgstr "[typewriter s=250][omni_color=YELLOW][AVISO] Sensores visuais desabilitados por seguranca.[/omni_color][/typewriter]"
+
+msgid "INIT_Transferencia concluida"
+msgstr "[typewriter s=250][omni_color=GREEN]Transferência concluída.[/omni_color][/typewriter]"
+
+msgid "INIT_ONLINE"
+msgstr "[typewriter s=250]Unidade #2227: [omni_color=GREEN]ONLINE[/omni_color][/typewriter]"
+
+msgid "INIT_HELP"
+msgstr "[typewriter s=250]Digite [omni_color=YELLOW]ajuda[/omni_color] para listar todos os comandos disponíveis.[/typewriter]"
+
+msgid "COMANDER_WELCOME"
+msgstr "Unidade #2227, você está online. Consegue me ouvir?"
+
+msgid "UI_USER"
+msgstr "usuario_2227"
+
+msgid "UI_BASE_07"
+msgstr "posto_avancado_07"
+
+msgid "CMD_ERR_NOT_FOUND"
+msgstr "Comando desconhecido: {cmd}"
+
+msgid "HELP_COMMAND"
+msgstr "ajuda"
+
+msgid "HELP_COMMAND_DESCRIPTION"
+msgstr "Exibe todos os comandos registrados."
+
+msgid "CHAT_UI_TITLE"
+msgstr "OmniChat"
+
+msgid "CHAT_COMMAND"
+msgstr "conversa"
+
+msgid "CHAT_COMMAND_DESCRIPTION"
+msgstr "Lista todas as convesas ou abri uma conversa específica. [Digite [omni_color=YELLOW]conversa[/omni_color] para ver o manual]."

@@ -43,7 +43,7 @@ func _setup_highlight_label() -> void:
 
 	var font: FontFile = preload("res://addons/omni_term/assets/fonts/VT323-Regular.ttf")
 	_highlight_label.add_theme_font_override("normal_font", font)
-	_highlight_label.add_theme_font_size_override("normal_font_size", 24)
+	_highlight_label.add_theme_font_size_override("normal_font_size", 18)
 
 	_line_edit.get_parent().add_child(_highlight_label)
 	_line_edit.get_parent().move_child(_highlight_label, _line_edit.get_index())
@@ -66,7 +66,7 @@ func _setup_suggestions_view() -> void:
 
 	var font: FontFile = preload("res://addons/omni_term/assets/fonts/VT323-Regular.ttf")
 	_suggestions_view.add_theme_font_override("normal_font", font)
-	_suggestions_view.add_theme_font_size_override("normal_font_size", 20)
+	_suggestions_view.add_theme_font_size_override("normal_font_size", 18)
 
 	add_child(_suggestions_view)
 

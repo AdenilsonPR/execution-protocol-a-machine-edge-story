@@ -76,21 +76,18 @@ static func _validate_file(path: String, global_map: Dictionary, conflicts: Arra
 		for err: String in file_errors:
 			printerr("  - ", err)
 
-	if not file_errors.is_empty():
-		printerr("OmniNarrative Validator: Structure errors in ", path.get_file(), ":")
-		for err: String in file_errors:
-			printerr("  - ", err)
-
 
 static func _check_node_links(node_id: String, node_data: Dictionary, nodes: Dictionary, errors: Array) -> void:
+	var is_external: bool = node_data.has("next_file")
+
 	if node_data.has("next"):
 		var next_id: String = node_data.next
-		if not nodes.has(next_id):
+		if not is_external and not nodes.has(next_id):
 			errors.append("Node '" + node_id + "' points to '" + next_id + "' (non-existent).")
 	
 	if node_data.has("next_node"):
 		var next_id: String = node_data.next_node
-		if not nodes.has(next_id):
+		if not is_external and not nodes.has(next_id):
 			errors.append("Node '" + node_id + "' (next_node) points to '" + next_id + "' (non-existent).")
 
 	if node_data.has("triggers"):

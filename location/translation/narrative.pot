@@ -1,0 +1,81 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: OmniSystem Narrative\n"
+
+#. Original Text: [typewriter s=250]INICIANDO SISTEMA DE TRANSFERÊNCIA...[/typewriter]
+msgid "INIT_UNIT"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=GREEN]Carregando consciênci[/omni_color][/typewriter][typewriter s=1][omni_color=GREEN]a[/omni_color][/typewriter][typewriter s=1]...[/typewriter]
+msgid "INIT_CONSCIENCE"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=YELLOW][AVISO] Sobrescrita de setor concluída. Registro anterior #2226 arquivado.[/omni_color][/typewriter]
+msgid "INIT_PURGE"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=RED][ERRO] Driver óptico incompativel.[/omni_color][/typewriter]
+msgid "INIT_OPTICAL_DRIVER"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=YELLOW][AVISO] Arquitetura detectada: Rede Neural v7 (obsoleto).[/omni_color][/typewriter]
+msgid "INIT_ARCHITECTURE"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=YELLOW][AVISO] Convertendo para interface textual...[/omni_color][/typewriter]
+msgid "INIT_textual_interface"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=YELLOW][AVISO] Sensores visuais desabilitados por seguranca.[/omni_color][/typewriter]
+msgid "INIT_Visual sensors"
+msgstr ""
+
+#. Original Text: [typewriter s=250][omni_color=GREEN]Transferência concluída.[/omni_color][/typewriter]
+msgid "INIT_Transferencia concluida"
+msgstr ""
+
+#. Original Text: [typewriter s=250]Unidade #2227: [omni_color=GREEN]ONLINE[/omni_color][/typewriter]
+msgid "INIT_ONLINE"
+msgstr ""
+
+#. Original Text: [typewriter s=250]Digite [omni_color=YELLOW]ajuda[/omni_color] para listar todos os comandos disponíveis.[/typewriter]
+msgid "INIT_HELP"
+msgstr ""
+
+#. Original Text: Unidade #2227, você está online. Consegue me ouvir?
+msgid "COMANDER_WELCOME"
+msgstr ""
+
+#. Original Text: usuario_2227
+msgid "UI_USER"
+msgstr ""
+
+#. Original Text: posto_avancado_07
+msgid "UI_BASE_07"
+msgstr ""
+
+#. Original Text: Comando desconhecido: {cmd}
+msgid "CMD_ERR_NOT_FOUND"
+msgstr ""
+
+#. Original Text: ajuda
+msgid "HELP_COMMAND"
+msgstr ""
+
+#. Original Text: Exibe todos os comandos registrados.
+msgid "HELP_COMMAND_DESCRIPTION"
+msgstr ""
+
+#. Original Text: OmniChat
+msgid "CHAT_UI_TITLE"
+msgstr ""
+
+#. Original Text: conversa
+msgid "CHAT_COMMAND"
+msgstr ""
+
+#. Original Text: Lista todas as convesas ou abri uma conversa específica. [Digite [omni_color=YELLOW]conversa[/omni_color] para ver o manual].
+msgid "CHAT_COMMAND_DESCRIPTION"
+msgstr ""

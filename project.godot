@@ -20,9 +20,19 @@ config/icon="res://icon.svg"
 OmniNarrative="*uid://cgrp8a8t1b237"
 OmniSave="*uid://dv5wkhv5cldpf"
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/omni_chat/plugin.cfg", "res://addons/omni_narrative/plugin.cfg", "res://addons/omni_save/plugin.cfg", "res://addons/omni_term/plugin.cfg")
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://location/translation/pt_BR.po")
 
 [omni_chat]
 
@@ -36,6 +46,7 @@ paths/translations="res://location/translation/"
 [omni_term]
 
 paths/effects="res://src/scripts/effects/"
+paths/commands="res://src/scripts/commands/"
 
 [physics]
 
@@ -43,5 +54,6 @@ paths/effects="res://src/scripts/effects/"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"

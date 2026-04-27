@@ -6,51 +6,59 @@
 			"text": [
 				{
 					"id": "INIT_UNIT",
-					"text": "[typewriter s=100]INICIANDO SISTEMA DE TRANSFERÊNCIA...[/typewriter]"
+					"text": "[typewriter s=250]INICIANDO SISTEMA DE TRANSFERÊNCIA...[/typewriter]"
+				},
+				{
+					"text": "[typewriter s=3]..........[/typewriter][typewriter s=2].....[/typewriter][typewriter s=1].....[/typewriter]",
+					"delay": 1.0
 				},
 				"\n",
 				{
 					"id": "INIT_CONSCIENCE",
-					"text": "[typewriter s=100][omni_color=GREEN]Carregando consciência...[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=GREEN]Carregando consciênci[/omni_color][/typewriter][typewriter s=1][omni_color=GREEN]a[/omni_color][/typewriter][typewriter s=1]...[/typewriter]"
 				},
 				"\n",
 				{
 					"id": "INIT_PURGE",
-					"text": "[typewriter s=50][omni_color=YELLOW][AVISO] Sobrescrita de setor concluída. Registro anterior (#2226) arquivado.[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=YELLOW][AVISO] Sobrescrita de setor concluída. Registro anterior #2226 arquivado.[/omni_color][/typewriter]"
 				},
 				{
 					"id": "INIT_OPTICAL_DRIVER",
-					"text": "[typewriter s=25][omni_color=RED][ERRO] Driver óptico incompativel.[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=RED][ERRO] Driver óptico incompativel.[/omni_color][/typewriter]"
 				},
 				{
 					"id": "INIT_ARCHITECTURE",
-					"text": "[typewriter s=50][omni_color=YELLOW][AVISO] Arquitetura detectada: Rede Neural v7 (obsoleto).[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=YELLOW][AVISO] Arquitetura detectada: Rede Neural v7 (obsoleto).[/omni_color][/typewriter]"
 				},
 				{
 					"id": "INIT_textual_interface",
-					"text": "[typewriter s=50][omni_color=YELLOW][AVISO] Convertendo para interface textual...[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=YELLOW][AVISO] Convertendo para interface textual...[/omni_color][/typewriter]"
 				},
 				{
 					"id": "INIT_Visual sensors",
-					"text": "[typewriter s=50][omni_color=YELLOW][AVISO] Sensores visuais desabilitados por seguranca.[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=YELLOW][AVISO] Sensores visuais desabilitados por seguranca.[/omni_color][/typewriter]"
 				},
 				"\n",
 				{
 					"id": "INIT_Transferencia concluida",
-					"text": "[typewriter s=50][omni_color=GREEN]Transferência concluída.[/omni_color][/typewriter]"
+					"text": "[typewriter s=250][omni_color=GREEN]Transferência concluída.[/omni_color][/typewriter]"
 				},
 				{
 					"id": "INIT_ONLINE",
-					"text": "[typewriter s=50]Unidade #2227: [omni_color=GREEN]ONLINE[/omni_color][/typewriter]"
+					"text": "[typewriter s=250]Unidade #2227: [omni_color=GREEN]ONLINE[/omni_color][/typewriter]"
 				},
-				"\n"
+				"\n",
+				{
+					"id": "INIT_HELP",
+					"text": "[typewriter s=250]Digite [omni_color=YELLOW]ajuda[/omni_color] para listar todos os comandos disponíveis.[/typewriter]"
+				}
 			],
 			"next": "load_reyes_script"
 		},
 		"load_reyes_script": {
 			"type": "event",
 			"next_file": "res://location/narrative/commander_reyes/intro_commander_reyes.json",
-			"next_node": "wait_input"
+			"next_node": "welcome"
 		}
 	}
 }

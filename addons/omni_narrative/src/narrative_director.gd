@@ -156,19 +156,18 @@ func _handle_terminal_node(data: Dictionary) -> void:
 
 	_terminal_node.lock()
 
-	if data.has("lines"):
-		for line: Variant in data.lines:
-			var line_text: String = _format_text(line)
-			var line_delay: float = line.get("delay", 0.5)
-
-			await _terminal_node.render_output(CommandOutput.create(line_text))
-			await get_tree().create_timer(line_delay).timeout
 	if data.has("text"):
 		var text_data: Variant = data["text"]
 		
 		if text_data is Array:
 			for line_data: Variant in text_data:
+				var line_delay: float = 0.5
+				
+				if line_data is Dictionary and line_data.has("delay"):
+					line_delay = float(line_data["delay"])
+				
 				await _terminal_node.render_output(CommandOutput.create(_format_text(line_data)))
+				await get_tree().create_timer(line_delay).timeout
 		else:
 			await _terminal_node.render_output(CommandOutput.create(_format_text(text_data)))
 
@@ -248,12 +247,12 @@ func _check_triggers() -> void:
 
 	for trigger: Variant in triggers:
 		var has_condition: bool = trigger.has("condition")
-		var has_next: bool = trigger.has("next_node")
+		var has_next: bool = trigger.has("next")
 
 		if has_condition and has_next:
 			if _evaluate_condition(trigger.condition):
 				_is_processing = false
-				await jump_to(trigger.next_node)
+				await jump_to(trigger.next)
 				break
 
 
