@@ -6,16 +6,12 @@
 			"text": [
 				{
 					"id": "INIT_UNIT",
-					"text": "[typewriter s=250]INICIANDO SISTEMA DE TRANSFERÊNCIA...[/typewriter]"
-				},
-				{
-					"text": "[typewriter s=3]..........[/typewriter][typewriter s=2].....[/typewriter][typewriter s=1].....[/typewriter]",
-					"delay": 1.0
+					"text": "[typewriter s=250 seq]INICIANDO SISTEMA DE TRANSFERÊNCIA [/typewriter][typewriter s=20 seq][==========[/typewriter][typewriter s=10 seq]==========[/typewriter][typewriter s=5 seq]=====[/typewriter]]"
 				},
 				"\n",
 				{
 					"id": "INIT_CONSCIENCE",
-					"text": "[typewriter s=250][omni_color=GREEN]Carregando consciênci[/omni_color][/typewriter][typewriter s=1][omni_color=GREEN]a[/omni_color][/typewriter][typewriter s=1]...[/typewriter]"
+					"text": "[omni_color=GREEN][typewriter s=250 seq]Carregando consciência [/typewriter][typewriter s=20 seq][==========[/typewriter][typewriter s=10 seq]==========[/typewriter][typewriter s=5 seq]=====[/typewriter]][/omni_color]"
 				},
 				"\n",
 				{
@@ -32,7 +28,7 @@
 				},
 				{
 					"id": "INIT_textual_interface",
-					"text": "[typewriter s=250][omni_color=YELLOW][AVISO] Convertendo para interface textual...[/omni_color][/typewriter]"
+					"text": "[omni_color=YELLOW][typewriter s=250 seq][AVISO] Convertendo para interface textual [/typewriter][typewriter s=25 seq][==========[/typewriter][typewriter s=50 seq]===============[/typewriter]][/omni_color]"
 				},
 				{
 					"id": "INIT_Visual sensors",

@@ -20,6 +20,5 @@ func execute(_args: PackedStringArray, context: CommandContext) -> CommandOutput
 		text += "[omni_color=NEUTRAL.4]%s[/color]\n" % [cmd.description]
 	
 	text += "[/typewriter]"
-	print(text)
 	
 	return CommandOutput.create(text.strip_edges())

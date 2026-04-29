@@ -24,6 +24,7 @@ var _mode: InputMode = InputMode.IDLE
 var _command_history: Array[String] = []
 var _history_index: int = -1
 var _internal_log: VBoxContainer
+var _last_hbox: HBoxContainer
 var _scroll_node: ScrollContainer
 var _username: String = "user"
 var _hostname: String = "local"
@@ -127,7 +128,8 @@ func _setup_ui() -> void:
 	_internal_log = VBoxContainer.new()
 	_internal_log.name = "VBoxContainer"
 	_internal_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_internal_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_internal_log.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_internal_log.add_theme_constant_override("separation", 0)
 	_scroll_node.add_child(_internal_log)
 
 
@@ -207,6 +209,8 @@ func unlock() -> void:
 
 
 func create_new_line() -> void:
+	_last_hbox = null
+	
 	if _is_locked or (_current_input and is_instance_valid(_current_input)):
 		return
 
@@ -288,43 +292,103 @@ func _process_output(output_data: CommandOutput) -> void:
 	if output_data.text.is_empty():
 		return
 
+	var await_regex: RegEx = RegEx.new()
+	await_regex.compile("\\[await(?:\\s+t=([\\d.]+))?\\]")
+
+	var segments: Array[Dictionary] = _split_by_await(output_data.text, await_regex)
+
+	if segments.size() <= 1:
+		await _render_segment(output_data.text, output_data.same_line)
+		return
+
+	for i: int in range(segments.size()):
+		var segment: Dictionary = segments[i]
+		var segment_text: String = segment.get("text", "")
+
+		if segment_text.strip_edges().is_empty():
+			if segment.get("delay", 0.0) > 0.0:
+				await get_tree().create_timer(segment["delay"]).timeout
+			continue
+
+		var is_same_line: bool = output_data.same_line or i > 0
+		await _render_segment(segment_text, is_same_line, true)
+
+		var delay: float = segment.get("delay", 0.0)
+		if delay > 0.0:
+			await get_tree().create_timer(delay).timeout
+
+
+func _split_by_await(text: String, regex: RegEx) -> Array[Dictionary]:
+	var segments: Array[Dictionary] = []
+	var last_end: int = 0
+
+	for m: RegExMatch in regex.search_all(text):
+		var segment_text: String = text.substr(last_end, m.get_start() - last_end)
+		var delay_str: String = m.get_string(1)
+		var delay: float = delay_str.to_float() if not delay_str.is_empty() else 0.0
+
+		segments.append({"text": segment_text, "delay": delay})
+		last_end = m.get_end()
+
+	var remaining: String = text.substr(last_end)
+	if not remaining.is_empty():
+		segments.append({"text": remaining, "delay": 0.0})
+
+	return segments
+
+
+func _render_segment(text: String, same_line: bool, compact: bool = false) -> void:
+	if not same_line:
+		_last_hbox = null
+
 	_freeze_history()
 
 	var label: RichTextLabel = RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
 
+	if compact:
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	else:
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	label.scroll_active = false
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+
 	var active_effects: Array = []
-	for effect in _custom_effects:
-		var effect_clone = effect.duplicate()
+	for effect: Variant in _custom_effects:
+		var effect_clone: Variant = effect.duplicate()
 		label.install_effect(effect_clone)
 		active_effects.append(effect_clone)
 
 	_add_to_log(label)
-	label.append_text(_preprocess_text(output_data.text))
+
+	if compact and _last_hbox:
+		_last_hbox.add_theme_constant_override("separation", 0)
+
+	label.append_text(_preprocess_text(text))
 
 	label_added.emit(label)
 	_scroll_to_bottom()
 
 	var has_pending_effects: bool = true
-	var text_lower: String = output_data.text.to_lower()
-	
+	var text_lower: String = text.to_lower()
+
 	while has_pending_effects:
 		has_pending_effects = false
-		for effect in active_effects:
+		for effect: Variant in active_effects:
 			if "bbcode" in effect and ("[" + effect.bbcode.to_lower()) not in text_lower:
 				continue
-				
+
 			if "is_finished" in effect and not effect.is_finished:
 				has_pending_effects = true
 				break
-				
+
 		if has_pending_effects:
 			await get_tree().process_frame
+			_scroll_to_bottom()
 
-	await get_tree().create_timer(0.1).timeout
-
-	output_rendered.emit(output_data.text)
+	output_rendered.emit(text)
 
 
 func clear_terminal() -> void:
@@ -347,20 +411,35 @@ func _start_engine() -> void:
 
 
 func _add_to_log(node: Node) -> void:
-	_internal_log.add_child(node)
-
-	if _current_input and _current_input.get_parent() == _internal_log:
-		if _current_input.focus_mode != Control.FOCUS_NONE:
-			_internal_log.move_child(node, _current_input.get_index())
+	var is_new_line: bool = false
+	if _last_hbox == null:
+		_last_hbox = HBoxContainer.new()
+		_last_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_last_hbox.add_theme_constant_override("separation", 0)
+		is_new_line = true
+	
+	if node.get_parent() == null:
+		_last_hbox.add_child(node)
+		
+	if is_new_line:
+		var index: int = -1
+		if _current_input and is_instance_valid(_current_input):
+			var input_parent: Node = _current_input.get_parent()
+			if input_parent and input_parent.get_parent() == _internal_log:
+				index = input_parent.get_index()
+		
+		_internal_log.add_child(_last_hbox)
+		if index != -1:
+			_internal_log.move_child(_last_hbox, index)
 
 
 func _preprocess_text(text: String) -> String:
-	var regex: RegEx = RegEx.new()
-	regex.compile("\\[omni_color=([A-Za-z_]+)(?:\\.(\\d))?\\]")
+	var result: String = _preprocess_seq(text)
 
-	var result: String = text
+	var color_regex: RegEx = RegEx.new()
+	color_regex.compile("\\[omni_color=([A-Za-z_]+)(?:\\.(\\d))?\\]")
 
-	for m: RegExMatch in regex.search_all(text):
+	for m: RegExMatch in color_regex.search_all(result):
 		var color_name_str: String = m.get_string(1).to_upper()
 		var shade_str: String = m.get_string(2)
 		var shade: int = shade_str.to_int() if not shade_str.is_empty() else 3
@@ -375,9 +454,71 @@ func _preprocess_text(text: String) -> String:
 	return result
 
 
+func _preprocess_seq(text: String) -> String:
+	var open_regex: RegEx = RegEx.new()
+	open_regex.compile("\\[typewriter([^\\]]*\\bseq\\b[^\\]]*)\\]")
+
+	if not open_regex.search(text):
+		return text
+
+	var strip_regex: RegEx = RegEx.new()
+	strip_regex.compile("\\[[^\\]]+\\]")
+
+	var speed_regex: RegEx = RegEx.new()
+	speed_regex.compile("s=([\\d.]+)")
+
+	var result: String = ""
+	var cumulative_delay: float = 0.0
+	var pos: int = 0
+	var close_tag: String = "[/typewriter]"
+
+	while pos < text.length():
+		var m: RegExMatch = open_regex.search(text, pos)
+
+		if not m:
+			result += text.substr(pos)
+			break
+
+		result += text.substr(pos, m.get_start() - pos)
+
+		var params: String = m.get_string(1)
+		var tag_end: int = m.get_end()
+		var close_pos: int = text.find(close_tag, tag_end)
+
+		if close_pos == -1:
+			result += text.substr(m.get_start())
+			break
+
+		var content: String = text.substr(tag_end, close_pos - tag_end)
+		var close_end: int = close_pos + close_tag.length()
+
+		var visible_text: String = strip_regex.sub(content, "", true)
+		var char_count: int = visible_text.length()
+
+		var speed_match: RegExMatch = speed_regex.search(params)
+		var speed: float = float(speed_match.get_string(1)) if speed_match else 50.0
+
+		var new_params: String = params.replace("seq", "").strip_edges()
+		while "  " in new_params:
+			new_params = new_params.replace("  ", " ")
+
+		if cumulative_delay > 0.0:
+			new_params += " d=" + str(snapped(cumulative_delay, 0.01))
+
+		result += "[typewriter " + new_params.strip_edges() + "]" + content + close_tag
+
+		cumulative_delay += float(char_count) / speed
+		pos = close_end
+
+	return result
+
+
 func _scroll_to_bottom() -> void:
-	await get_tree().process_frame
-	_scroll_node.scroll_vertical = int(_scroll_node.get_v_scroll_bar().max_value)
+	if not is_inside_tree() or not _scroll_node: 
+		return
+	
+	var v_scroll := _scroll_node.get_v_scroll_bar()
+	_scroll_node.scroll_vertical = int(v_scroll.max_value)
 
 
 func _on_input_changed(new_text: String) -> void:

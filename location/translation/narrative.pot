@@ -4,11 +4,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Project-Id-Version: OmniSystem Narrative\n"
 
-#. Original Text: [typewriter s=250]INICIANDO SISTEMA DE TRANSFERÊNCIA...[/typewriter]
+#. Original Text: [typewriter s=250 seq]INICIANDO SISTEMA DE TRANSFERÊNCIA [/typewriter][typewriter s=20 seq][==========[/typewriter][typewriter s=10 seq]==========[/typewriter][typewriter s=5 seq]=====[/typewriter]]
 msgid "INIT_UNIT"
 msgstr ""
 
-#. Original Text: [typewriter s=250][omni_color=GREEN]Carregando consciênci[/omni_color][/typewriter][typewriter s=1][omni_color=GREEN]a[/omni_color][/typewriter][typewriter s=1]...[/typewriter]
+#. Original Text: [omni_color=GREEN][typewriter s=250 seq]Carregando consciência [/typewriter][typewriter s=20 seq][==========[/typewriter][typewriter s=10 seq]==========[/typewriter][typewriter s=5 seq]=====[/typewriter]][/omni_color]
 msgid "INIT_CONSCIENCE"
 msgstr ""
 
@@ -24,7 +24,7 @@ msgstr ""
 msgid "INIT_ARCHITECTURE"
 msgstr ""
 
-#. Original Text: [typewriter s=250][omni_color=YELLOW][AVISO] Convertendo para interface textual...[/omni_color][/typewriter]
+#. Original Text: [omni_color=YELLOW][typewriter s=250 seq][AVISO] Convertendo para interface textual [/typewriter][typewriter s=25 seq][==========[/typewriter][typewriter s=50 seq]===============[/typewriter]][/omni_color]
 msgid "INIT_textual_interface"
 msgstr ""
 

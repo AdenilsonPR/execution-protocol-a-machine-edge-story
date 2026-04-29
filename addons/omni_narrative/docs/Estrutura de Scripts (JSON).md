@@ -35,6 +35,33 @@ Envia texto para o terminal OmniTerm.
 }
 ```
 
+**Propriedade `delay` por linha:** cada objeto do array pode ter um `delay` próprio (em segundos) para controlar o intervalo antes da próxima linha:
+
+```json
+"text": [
+    { "id": "FAST_LINE", "text": "Rápido!", "delay": 0.2 },
+    { "id": "SLOW_LINE", "text": "Devagar...", "delay": 2.0 }
+]
+```
+
+Se omitido, o delay padrão entre linhas é `0.5` segundos.
+
+### ⏳ Controle de Fluxo Inline com `[await]`
+
+A tag `[await]` permite criar **pontos de barreira** dentro de uma mesma linha de texto. Tudo antes do `[await]` é renderizado e o sistema aguarda os efeitos terminarem antes de continuar com o próximo segmento na mesma linha.
+
+```json
+{
+    "id": "LOADING_BAR",
+    "text": "[typewriter s=3]...[/typewriter][await][typewriter s=2]...[/typewriter][await][typewriter s=1]...[/typewriter]"
+}
+```
+
+A tag também aceita um delay opcional: `[await t=1.5]` adiciona uma pausa de 1.5 segundos entre segmentos.
+
+> [!TIP]
+> Texto sem `[await]` mantém o comportamento padrão (efeitos processados simultaneamente). Consulte a documentação de [[Efeitos de Texto Customizados]] para exemplos avançados.
+
 ### ⌨️ Terminal Input (`"type": "terminal_input"`)
 Prepara o terminal para receber um comando do jogador.
 

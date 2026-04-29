@@ -56,13 +56,11 @@ class_name TypewriterEffect extends RichTextEffect
 
 var bbcode = "typewriter"
 
-# Flag lida nativamente pelo Terminal Omni
 var is_finished: bool = true 
 var _last_frame: int = -1
 
 func _process_custom_fx(char_fx: CharFXTransform) -> bool:
 	var current_frame: int = Engine.get_frames_drawn()
-	# No início de cada frame de renderização, assumimos que o efeito já terminou.
 	if current_frame != _last_frame:
 		_last_frame = current_frame
 		is_finished = true
@@ -72,7 +70,6 @@ func _process_custom_fx(char_fx: CharFXTransform) -> bool:
 	
 	if char_fx.relative_index > time:
 		char_fx.color.a = 0.0
-		# Se houver qualquer caractere não visível, invalidamos o término.
 		is_finished = false
 		
 	return true
@@ -86,3 +83,104 @@ func _process_custom_fx(char_fx: CharFXTransform) -> bool:
 
 > [!IMPORTANT]
 > Sempre use `@tool` no topo dos seus scripts de efeito (se for editá-los diretamente no editor Godot) para que a engine possa processá-los corretamente.
+
+---
+
+## Sequenciamento Automático com `seq` 🤖
+
+Para evitar cálculos manuais de delay (como o mostrado acima), o Terminal Omni possui o parâmetro inteligente **`seq`**. Quando presente na tag `[typewriter]`, o sistema calcula automaticamente o delay necessário baseado no comprimento e na velocidade de todos os blocos `seq` anteriores na mesma linha.
+
+### Exemplo: Barra de progresso simplificada
+
+```json
+{
+    "id": "PROGRESS_BAR",
+    "text": "[[typewriter s=4 seq]====[/typewriter][typewriter s=2 seq]====[/typewriter][typewriter s=1 seq]====[/typewriter]]"
+}
+```
+
+O terminal transformará isso internamente em:
+- Bloco 1: delay 0 (20 chars / speed 4 = 5s de duração)
+- Bloco 2: delay 5.0s (20 chars / speed 2 = 10s de duração)
+- Bloco 3: delay 15.0s (5s + 10s)
+
+### Sintaxe de Parâmetros
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `s` | float | Velocidade (caracteres por segundo) |
+| `d` | float | Delay manual em segundos antes de iniciar |
+| `seq` | flag | Ativa o sequenciamento automático de delays |
+
+> [!IMPORTANT]
+> O parâmetro `seq` só funciona com blocos do tipo `[typewriter]`. Ele ignora tags BBCode internas ao calcular o comprimento do texto, garantindo precisão mesmo com cores ou outros estilos aplicados.
+
+> [!TIP]
+> Use `seq` para a maioria dos casos de animações encadeadas. Use `d=` apenas quando precisar de um delay específico que não dependa do texto anterior ou para sobrepor o comportamento do `seq`.
+
+---
+
+## Delay Manual com `d=` ⏱️
+
+O efeito `[typewriter]` também suporta o parâmetro `d` para controle total e manual do tempo. Isso permite criar animações **sequenciais dentro de um único label**, onde texto ao redor (como colchetes) fica visível desde o início.
+
+### Cálculo do delay manual
+
+Para encadear blocos manualmente, calcule: `delay = chars_anteriores / speed_anterior`
+
+| Bloco | Chars | Speed | Duração | Delay acumulado |
+|-------|-------|-------|---------|-----------------|
+| 1º | 5 | 3 | 5/3 ≈ 1.67s | 0 (sem `d`) |
+| 2º | 3 | 2 | 3/2 = 1.5s | 1.67 |
+| 3º | 2 | 1 | 2/1 = 2.0s | 1.67 + 1.5 = 3.17 |
+
+> [!NOTE]
+> Texto sem tags de efeito ou fora das tags `typewriter` aparece instantaneamente. Por isso, ao usar `d=` ou `seq`, molduras como `[` e `]` são renderizadas de imediato.
+
+---
+
+## Controle de Fluxo com `[await]` ⏳
+
+A tag `[await]` permite controlar a ordem de execução de múltiplos efeitos **dentro da mesma linha**. Por padrão, todos os efeitos em uma linha são processados de forma assíncrona (simultaneamente). A tag `[await]` cria um **ponto de barreira**: o terminal aguarda todos os efeitos anteriores terminarem antes de renderizar o próximo segmento.
+
+### Sintaxe
+
+| Tag | Comportamento |
+|-----|---------------|
+| `[await]` | Aguarda todos os efeitos anteriores terminarem |
+| `[await t=0.5]` | Aguarda + adiciona um delay de 0.5 segundos |
+
+### Exemplos
+
+**Carregamento sequencial:**
+```json
+{
+    "id": "LOADING",
+    "text": "[typewriter s=3]...[/typewriter][await][typewriter s=2]...[/typewriter][await][typewriter s=1]...[/typewriter]"
+}
+```
+Resultado: cada `...` aparece somente após o anterior terminar.
+
+**Com delay entre segmentos:**
+```json
+{
+    "id": "STAGED_BOOT",
+    "text": "[typewriter s=50]Verificando...[/typewriter][await t=1.0][typewriter s=50]OK[/typewriter]"
+}
+```
+Resultado: "Verificando..." aparece, espera 1 segundo, depois "OK" aparece.
+
+**Misto — parte sync, parte async:**
+```json
+{
+    "id": "INIT_MIX",
+    "text": "[typewriter s=50]Inicializando...[/typewriter][await][typewriter s=3]OK[/typewriter] [typewriter s=3]DONE[/typewriter]"
+}
+```
+Resultado: "Inicializando..." aparece primeiro, depois "OK" e "DONE" aparecem juntos (sem `[await]` entre eles).
+
+> [!TIP]
+> A tag `[await]` não é uma tag BBCode do Godot — ela é processada pelo Terminal Omni antes da renderização. Texto sem `[await]` mantém o comportamento padrão (assíncrono).
+
+⬅️ Voltar para a [[Home]]
+

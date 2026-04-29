@@ -158,14 +158,14 @@ func _handle_terminal_node(data: Dictionary) -> void:
 
 	if data.has("text"):
 		var text_data: Variant = data["text"]
-		
+
 		if text_data is Array:
 			for line_data: Variant in text_data:
 				var line_delay: float = 0.5
-				
+
 				if line_data is Dictionary and line_data.has("delay"):
 					line_delay = float(line_data["delay"])
-				
+
 				await _terminal_node.render_output(CommandOutput.create(_format_text(line_data)))
 				await get_tree().create_timer(line_delay).timeout
 		else:
